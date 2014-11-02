@@ -60,7 +60,8 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	encoder = encoderInit(1, 2, false);
+	liftEncoder = encoderInit(1, 2, false);
+
 	//Init Drive Motors
 	frontLeftWheel = createMotorWithIME(8, 0, true);
 	frontRightWheel = createMotorWithIME(9, 1, true);
@@ -83,6 +84,4 @@ void initialize() {
 	left_right_drive = createAxis(4);
 	forward_backward_strafe = createAxis(2);
 	left_right_strafe = createAxis(1);
-
-	limit = limitSwitchInit(1);
 }

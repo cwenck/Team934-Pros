@@ -25,12 +25,8 @@ typedef struct {
 	bool reversed;
 } Motor;
 
+//vars
 extern unsigned char connectedIntegratedMotorEncoders;
-
-void setMotorPower(Motor motor, int speed);
-
-Motor createMotor(unsigned char port, bool reversed);
-Motor createMotorWithIME(unsigned char port, unsigned char imeAddress, bool reversed);
 
 extern Motor frontLeftWheel;
 extern Motor frontRightWheel;
@@ -44,6 +40,12 @@ extern Motor topRightLift;
 extern Motor middleRightLift;
 extern Motor bottomRightLift;
 
+//functions
+void setMotorPower(Motor motor, int speed);
+
+Motor createMotor(unsigned char port, bool reversed);
+Motor createMotorWithIME(unsigned char port, unsigned char imeAddress, bool reversed);
+
 /////////
 //Drive//
 /////////
@@ -56,8 +58,10 @@ typedef enum {
 	left, right, forward, backward
 } Direction;
 
+//vars
 extern const int DRIVE_THRESHOLD;
 
+//functions
 void setRightMotorSpeed(int speed, WheelDirection dir);
 void setLeftMotorSpeed(int speed, WheelDirection dir);
 
@@ -73,9 +77,11 @@ void handleDriveOrStrafing();
 //Lift//
 ////////
 
+//vars
 extern const short liftHighPower;
 extern const short liftLowPower;
 
+//functions
 void handleLiftInput();
 void setLiftPower(int speed);
 
@@ -90,28 +96,31 @@ typedef struct {
 	unsigned char channel;
 	bool onPartnerJoystick;
 
-} JoyBtn;
+} JoyInput;
 
-extern JoyBtn liftUp;
-extern JoyBtn liftDown;
 
-extern JoyBtn forward_backward_drive;
-extern JoyBtn left_right_drive;
-extern JoyBtn forward_backward_strafe;
-extern JoyBtn left_right_strafe;
+//vars
+extern JoyInput liftUp;
+extern JoyInput liftDown;
 
-int readJoystick(JoyBtn button);
+extern JoyInput forward_backward_drive;
+extern JoyInput left_right_drive;
+extern JoyInput forward_backward_strafe;
+extern JoyInput left_right_strafe;
 
-JoyBtn createButton(unsigned char channel, unsigned char btn);
-JoyBtn createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn);
-JoyBtn createAxis(unsigned char channel);
-JoyBtn createAxisOnPartnerJoystick(unsigned char channel);
 
+//functions
+int readJoystick(JoyInput button);
 unsigned char getNumConnectedJoysticks();
 
-/////////////////
-//Other Sensors//
-/////////////////
+JoyInput createButton(unsigned char channel, unsigned char btn);
+JoyInput createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn);
+JoyInput createAxis(unsigned char channel);
+JoyInput createAxisOnPartnerJoystick(unsigned char channel);
+
+///////////
+//Sensors//
+///////////
 
 typedef struct {
 	unsigned char port;
@@ -121,20 +130,20 @@ typedef struct {
 	unsigned char port;
 } LimitSwitch;
 
+//vars
+extern Encoder liftEncoder;
+
+//functions
 Bumper bumperInit(unsigned char port);
 bool bumperPressed(Bumper bumper);
 
 LimitSwitch limitSwitchInit(unsigned char port);
 bool limitSwitchPressed(LimitSwitch limitSwitch);
 
+
 /////////
 //Other//
 /////////
-
-extern LimitSwitch limit;
-extern Encoder encoder;
-extern JoyBtn x_axis;
-extern JoyBtn y_axis;
 
 //returns the main battery power in volts
 float getMainBatteryPower();

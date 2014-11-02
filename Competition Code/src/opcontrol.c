@@ -52,22 +52,12 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-	encoderReset(encoder);
-	y_axis = createAxis(3);
-	x_axis = createAxis(4);
-	int y = readJoystick(y_axis);
-	int x = readJoystick(x_axis);
+	encoderReset(liftEncoder);
 	while (1) {
-		y = readJoystick(y_axis);
-		x = readJoystick(x_axis);
-//		printf("Y: %d  X: %d\n\r", y, x);i
-//		motorSet(9, y);
-//		handleAllInput();
-//		setMotorPower(backLeftWheel, y);
-		handleDriveInput();
-//		setMotorPower(backLeftWheel, y);
+
+//		handleDriveInput();
+		handleDriveOrStrafing();
 		handleLiftInput();
-//		setLiftPower(y);
 
 		delay(20);
 	}

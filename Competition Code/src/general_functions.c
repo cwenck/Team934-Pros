@@ -4,10 +4,8 @@
 //Variables//
 /////////////
 
-LimitSwitch limit;
-Encoder encoder;
-JoyBtn x_axis;
-JoyBtn y_axis;
+//Lift liftEncoder
+Encoder liftEncoder;
 
 //Init Drive Motors
 Motor frontLeftWheel;
@@ -24,49 +22,49 @@ Motor middleRightLift;
 Motor bottomRightLift;
 
 //Init Controller Buttons
-JoyBtn liftUp;
-JoyBtn liftDown;
+JoyInput liftUp;
+JoyInput liftDown;
 
-JoyBtn forward_backward_drive;
-JoyBtn left_right_drive;
-JoyBtn forward_backward_strafe;
-JoyBtn left_right_strafe;
+JoyInput forward_backward_drive;
+JoyInput left_right_drive;
+JoyInput forward_backward_strafe;
+JoyInput left_right_strafe;
 
 void handleAllInput() {
 	handleDriveOrStrafing();
-//	handleLiftInput();
+	handleLiftInput();
 }
 
 ////////////
 //Joystick//
 ////////////
 
-JoyBtn createButton(unsigned char channel, unsigned char btn) {
-	JoyBtn button;
+JoyInput createButton(unsigned char channel, unsigned char btn) {
+	JoyInput button;
 	button.channel = channel;
 	button.btn = btn;
 	button.onPartnerJoystick = false;
 	return button;
 }
 
-JoyBtn createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn) {
-	JoyBtn button;
+JoyInput createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn) {
+	JoyInput button;
 	button.channel = channel;
 	button.btn = btn;
 	button.onPartnerJoystick = true;
 	return button;
 }
 
-JoyBtn createAxis(unsigned char channel) {
-	JoyBtn button;
+JoyInput createAxis(unsigned char channel) {
+	JoyInput button;
 	button.channel = channel;
 	button.btn = NULL;
 	button.onPartnerJoystick = false;
 	return button;
 }
 
-JoyBtn createAxisOnPartnerJoystick(unsigned char channel) {
-	JoyBtn button;
+JoyInput createAxisOnPartnerJoystick(unsigned char channel) {
+	JoyInput button;
 	button.channel = channel;
 	button.btn = NULL;
 	button.onPartnerJoystick = true;
@@ -86,7 +84,7 @@ unsigned char getNumConnectedJoysticks() {
 
 //If it is a button a 1 is returned for true and 0 for false
 //otherwise a value between -127 and 127 is returned for the particular axis
-int readJoystick(JoyBtn button) {
+int readJoystick(JoyInput button) {
 	unsigned char joy = 1;
 	if (button.onPartnerJoystick) {
 		joy = 2;
