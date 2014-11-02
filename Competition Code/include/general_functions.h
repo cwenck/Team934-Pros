@@ -1,0 +1,142 @@
+/*
+ * general_functions.h
+ *
+ *  Created on: Oct 18, 2014
+ *      Author: guywenck
+ */
+
+#ifndef GENERAL_FUNCTIONS_H_
+#define GENERAL_FUNCTIONS_H_
+
+#endif /* GENERAL_FUNCTIONS_H_ */
+
+#include "main.h"
+
+////////////
+void handleAllInput();
+///////////
+
+//////////
+//Motors//
+//////////
+typedef struct {
+	unsigned char port;
+	unsigned char imeAddress;
+	bool reversed;
+} Motor;
+
+extern unsigned char connectedIntegratedMotorEncoders;
+
+void setMotorPower(Motor motor, int speed);
+
+Motor createMotor(unsigned char port, bool reversed);
+Motor createMotorWithIME(unsigned char port, unsigned char imeAddress, bool reversed);
+
+extern Motor frontLeftWheel;
+extern Motor frontRightWheel;
+extern Motor backLeftWheel;
+extern Motor backRightWheel;
+
+extern Motor topLeftLift;
+extern Motor middleLeftLift;
+extern Motor bottomLeftLift;
+extern Motor topRightLift;
+extern Motor middleRightLift;
+extern Motor bottomRightLift;
+
+/////////
+//Drive//
+/////////
+
+typedef enum {
+	same, towards, away
+} WheelDirection;
+
+typedef enum {
+	left, right, forward, backward
+} Direction;
+
+extern const int DRIVE_THRESHOLD;
+
+void setRightMotorSpeed(int speed, WheelDirection dir);
+void setLeftMotorSpeed(int speed, WheelDirection dir);
+
+void strafe(int speed, Direction dir);
+void drive(int speed, Direction dir);
+
+void handleDriveInput();
+void handleStrafingInput();
+
+void handleDriveOrStrafing();
+
+////////
+//Lift//
+////////
+
+extern const short liftHighPower;
+extern const short liftLowPower;
+
+void handleLiftInput();
+void setLiftPower(int speed);
+
+////////////
+//Controls//
+////////////
+
+extern unsigned char connectedJoysticks;
+
+typedef struct {
+	unsigned char btn;
+	unsigned char channel;
+	bool onPartnerJoystick;
+
+} JoyBtn;
+
+extern JoyBtn liftUp;
+extern JoyBtn liftDown;
+
+extern JoyBtn forward_backward_drive;
+extern JoyBtn left_right_drive;
+extern JoyBtn forward_backward_strafe;
+extern JoyBtn left_right_strafe;
+
+int readJoystick(JoyBtn button);
+
+JoyBtn createButton(unsigned char channel, unsigned char btn);
+JoyBtn createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn);
+JoyBtn createAxis(unsigned char channel);
+JoyBtn createAxisOnPartnerJoystick(unsigned char channel);
+
+unsigned char getNumConnectedJoysticks();
+
+/////////////////
+//Other Sensors//
+/////////////////
+
+typedef struct {
+	unsigned char port;
+} Bumper;
+
+typedef struct {
+	unsigned char port;
+} LimitSwitch;
+
+Bumper bumperInit(unsigned char port);
+bool bumperPressed(Bumper bumper);
+
+LimitSwitch limitSwitchInit(unsigned char port);
+bool limitSwitchPressed(LimitSwitch limitSwitch);
+
+/////////
+//Other//
+/////////
+
+extern LimitSwitch limit;
+extern Encoder encoder;
+extern JoyBtn x_axis;
+extern JoyBtn y_axis;
+
+//returns the main battery power in volts
+float getMainBatteryPower();
+//print the main batter power in volts
+void printMainBatteryPower();
