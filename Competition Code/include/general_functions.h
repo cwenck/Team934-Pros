@@ -130,6 +130,61 @@ typedef struct {
 	unsigned char port;
 } LimitSwitch;
 
+typedef enum {
+	IntegratedMotorEncoder,
+	QuadratureEncoder,
+	Sonar,
+	Line,
+	Light,
+	Bumper,
+	LimitSwitch,
+	Potentiometer,
+	Gyroscope,
+	Accelerometer,
+} SensorType;
+
+typedef enum {
+	Digital_1,
+	Digital_2,
+	Digital_3,
+	Digital_4,
+	Digital_5,
+	Digital_6,
+	Digital_7,
+	Digital_8,
+	Digital_9,
+	Digital_10,
+	Digital_11,
+	Digital_12,
+	Analog_1,
+	Analog_2,
+	Analog_3,
+	Analog_4,
+	Analog_5,
+	Analog_6,
+	Analog_7,
+	Analog_8,
+	IME_1,
+	IME_2,
+	IME_3,
+	IME_4,
+	IME_5,
+	IME_6,
+	IME_7,
+	IME_8,
+} SensorPort;
+
+typedef struct {
+	SensorType type;
+	SensorPort port_1;
+
+	//Only used for Sonar and Quadrature encoders
+	//order does not matter for the quadrature encoder,
+	//it only reverses the direction of the rotation
+	//This should be NULL if it is not one of those two sensor types.
+	SensorPort port_2;
+} Sensor;
+
 //vars
 extern Encoder liftEncoder;
 
@@ -140,6 +195,28 @@ bool bumperPressed(Bumper bumper);
 LimitSwitch limitSwitchInit(unsigned char port);
 bool limitSwitchPressed(LimitSwitch limitSwitch);
 
+Sensor createSensor(SensorType, SensorPort port_1, SensorPort port_2);
+int getSensorValue(Sensor sensor);
+
+///////
+//PID//
+///////
+
+typedef struct {
+	float kp;
+	float ki;
+	float kd;
+	float error;
+	float last_error;
+	float target;
+	float position;
+	float integral;
+	float integral_min;
+	float integral_max;
+	float derivative;
+	void (* setMotorSpeedFunction) (int);
+	Sensor sensor;
+} pidController;
 
 /////////
 //Other//

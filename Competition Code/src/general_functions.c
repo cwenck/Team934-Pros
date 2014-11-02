@@ -248,10 +248,10 @@ void handleDriveInput() {
 	int y = readJoystick(forward_backward_drive);
 	int x = readJoystick(left_right_drive);
 
-	if(abs(y) > abs(x)){
+	if (abs(y) > abs(x)) {
 		setLeftMotorSpeed(y, same);
 		setRightMotorSpeed(y, same);
-	} else if (abs(x) >= abs(y)){
+	} else if (abs(x) >= abs(y)) {
 		setLeftMotorSpeed(x, same);
 		setRightMotorSpeed(-x, same);
 	}
@@ -285,9 +285,9 @@ void handleDriveOrStrafing() {
 	}
 }
 
-/////////////////
-//Other Sensors//
-/////////////////
+///////////
+//Sensors//
+///////////
 
 //Init bumpers in initializeIO()
 Bumper bumperInit(unsigned char port) {
@@ -322,6 +322,11 @@ bool limitSwitchPressed(LimitSwitch limitSwitch) {
 	}
 	return false;
 }
+
+///////
+//PID//
+///////
+
 
 /////////
 //Other//
