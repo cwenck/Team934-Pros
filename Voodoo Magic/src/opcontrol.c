@@ -56,9 +56,10 @@ void operatorControl() {
 	while (1) {
 
 //		handleDriveInput();
-		handleDriveOrStrafing();
-		handleLiftInput();
-
+//		handleDriveOrStrafing();
+//		handleLiftInput();
+		int speed = readJoystick(forward_backward_drive);
+		motorSet(4, speed);
 		delay(20);
 	}
 }
