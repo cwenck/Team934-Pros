@@ -128,7 +128,7 @@ typedef struct {
 
 typedef struct {
 	unsigned char port;
-} LimitSwitch;
+} PushButton;
 
 typedef enum {
 	IntegratedMotorEncoder,
@@ -192,8 +192,8 @@ extern Encoder liftEncoder;
 Bumper bumperInit(unsigned char port);
 bool bumperPressed(Bumper bumper);
 
-LimitSwitch limitSwitchInit(unsigned char port);
-bool limitSwitchPressed(LimitSwitch limitSwitch);
+PushButton limitSwitchInit(unsigned char port);
+bool limitSwitchPressed(PushButton limitSwitch);
 
 Sensor createSensor(SensorType, SensorPort port_1, SensorPort port_2);
 int getSensorValue(Sensor sensor);

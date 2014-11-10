@@ -43,6 +43,8 @@ Motor createMotor(unsigned char port, bool reversed);
 Motor createMotorWithIME(unsigned char port, unsigned char imeAddress,
 		bool reversed);
 
+void resetMotorIME(Motor motor);
+int readMotorIME(Motor motor);
 /////////
 //Drive//
 /////////
@@ -119,18 +121,19 @@ JoyInput createAxisOnPartnerJoystick(unsigned char channel);
 
 typedef struct {
 	unsigned char port;
-} Bumper;
+} PushButton;
 
 typedef struct {
 	unsigned char port;
-} LimitSwitch;
+	bool inverted;
+} AnalogSensor;
 
 typedef enum {
 	IntegratedMotorEncoder,	//IC2
 	QuadratureEncoder,		//?
 	Sonar,					//Digital
-	Line,					//?
-	Light,					//?
+	Line,					//Analog
+	Light,					//Analog
 	Push_Button,			//Digital
 	Limit_Switch,			//Digital
 	Potentiometer,			//Analog
@@ -178,21 +181,34 @@ typedef struct {
 	//it only reverses the direction of the rotation
 	//This should be NULL if it is not one of those two sensor types.
 	SensorPort port_2;
+	bool inverted;
+	union {
+		Encoder encoder;
+		PushButton pushButton;
+		Ultrasonic sonar;
+		AnalogSensor analog;
+		Gyro gyro;
+	} sensorData;
 } Sensor;
 
 //vars
 extern Encoder liftEncoder;
 
 //functions
-Bumper bumperInit(unsigned char port);
-bool bumperPressed(Bumper bumper);
 
-LimitSwitch limitSwitchInit(unsigned char port);
-bool limitSwitchPressed(LimitSwitch limitSwitch);
+//used for Bumpers and limit switches
+PushButton pushButtonInit(unsigned char port);
+bool pushButtonPressed(PushButton pushButton);
 
-Sensor createSensor(SensorType, SensorPort port_1, SensorPort port_2);
-int getSensorValue(Sensor sensor);
-int sensorGet(Sensor sensor);	//alias for getSensorValue(Sensor sensor);
+int portDecode(SensorPort port);
+
+AnalogSensor analogSensorInit(int port, bool inverted);
+int analogSensorRead(AnalogSensor sensor);
+
+Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
+		bool inverted, int sensorConfig);
+//void sensorInit(Sensor sensor, bool inverted, int sensorConfig);
+int sensorGet(Sensor sensor);
 
 ///////
 //PID//
@@ -202,11 +218,24 @@ typedef struct {
 	float kp;
 	float ki;
 	float kd;
+	int p_speed;
+	int i_speed;
+	int d_speed;
+	int motor_speed;
+	//number of checks passed to
+	//see if the target has been reached
+	int num_checks_passed;
+	bool target_reached;
+	float error_tolerance;
 	float error;
 	float last_error;
-	float target;
-	float position;
+	float sensor_target;
+	float sensor_reading;
 	float integral;
+	bool ignoreIntegralBounds;
+	//how samll the error needs to be
+	// for the integral to be calculated
+	float integral_range;
 	float integral_min;
 	float integral_max;
 	float derivative;
@@ -214,9 +243,19 @@ typedef struct {
 	Sensor sensor;
 } PIDController;
 
+PIDController pidControllerInit(float kp, float ki, float kd,
+		void (*setMotorSpeedFunction)(int), Sensor sensor);
+void pidControllerSetTarget(PIDController *controller, float target);
+void pidSetIntegralRange(PIDController *controller, float integralRange);
+void pidControllerSetIntegralSpeedBounds(PIDController *controller, float integral_min, float integral_max);
+void pidStart(PIDController *controller);
+void pidTask(void *ignore);
+
 /////////
 //Other//
 /////////
+
+int capMotorPower(int value);
 
 //returns the main battery power in volts
 float getMainBatteryPower();

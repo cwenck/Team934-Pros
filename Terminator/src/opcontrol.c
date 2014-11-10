@@ -51,15 +51,30 @@
  *
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
+
+void runMotor(int speed) {
+	motorSet(2, -speed);
+}
+
 void operatorControl() {
-	encoderReset(liftEncoder);
+//	encoderReset(liftEncoder);
+	Sensor encoder = sensorInit(QuadratureEncoder, Digital_3, Digital_4, false,
+			NULL);
+//	Encoder encoder = encoderInit(3, 4, false);
+//	encoderReset(encoder);
+	PIDController pid = pidControllerInit(2 , .1, .6, runMotor, encoder);
+	pidControllerSetTarget(&pid, 500);
+	pidSetIntegralRange(&pid, 100);
+	pidStart(&pid);
 	while (1) {
 //		handleDriveInput();
-		handleDriveOrStrafing();
-		handleLiftInput();
+//		handleDriveOrStrafing();
+//		handleLiftInput();
 
 		int speed = readJoystick(forward_backward_drive);
-		motorSet(8, speed);
+		printf("%d\n\r", sensorGet(encoder));
+//		printf("%d\n\r", encoderGet(encoder));
+		runMotor(speed);
 
 		delay(20);
 	}

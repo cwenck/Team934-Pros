@@ -130,6 +130,19 @@ Motor createMotorWithIME(unsigned char port, unsigned char imeAddress,
 	return motor;
 }
 
+void resetMotorIME(Motor motor) {
+	imeReset(motor.imeAddress);
+}
+
+int readMotorIME(Motor motor) {
+	int value;
+	imeGet(motor.imeAddress, &value);
+	if (motor.reversed) {
+		value = -value;
+	}
+	return value;
+}
+
 ////////
 //Lift//
 ////////
@@ -285,56 +298,324 @@ void handleDriveOrStrafing() {
 //Sensors//
 ///////////
 
-//Init bumpers in initializeIO()
-Bumper bumperInit(unsigned char port) {
-	Bumper bumper;
-	bumper.port = port;
-	pinMode(bumper.port, INPUT);
-	return bumper;
-}
-
-// digitalRead() returns LOW if Pressed or HIGH if released
-// the function returns true if the bumper is pressed
-bool bumperPressed(Bumper bumper) {
-	if (digitalRead(bumper.port) == LOW) {
-		return true;
-	}
-	return false;
-}
-
-// Init limit switches in initializeIO()
-LimitSwitch limitSwitchInit(unsigned char port) {
-	LimitSwitch limitSwitch;
+// Init limit switch / bumpers in initializeIO()
+PushButton pushButtonInit(unsigned char port) {
+	PushButton limitSwitch;
 	limitSwitch.port = port;
 	pinMode(limitSwitch.port, INPUT);
 	return limitSwitch;
 }
 
 // digitalRead() returns LOW if Pressed or HIGH if released
-// the function returns true if the bumper is pressed
-bool limitSwitchPressed(LimitSwitch limitSwitch) {
+// the function returns true if the bumper/limit switch is pressed
+bool bumpPressed(PushButton limitSwitch) {
 	if (digitalRead(limitSwitch.port) == LOW) {
 		return true;
 	}
 	return false;
 }
 
-int getSensorValue(Sensor sensor){
-
+int portDecode(SensorPort sensorPort) {
+	switch (sensorPort) {
+	case Digital_1:
+		return 1;
+		break;
+	case Digital_2:
+		return 2;
+		break;
+	case Digital_3:
+		return 3;
+		break;
+	case Digital_4:
+		return 4;
+		break;
+	case Digital_5:
+		return 5;
+		break;
+	case Digital_6:
+		return 6;
+		break;
+	case Digital_7:
+		return 7;
+		break;
+	case Digital_8:
+		return 8;
+		break;
+	case Digital_9:
+		return 9;
+		break;
+	case Digital_10:
+		return 10;
+		break;
+	case Digital_11:
+		return 11;
+		break;
+	case Digital_12:
+		return 12;
+		break;
+	case Analog_1:
+		return 1;
+		break;
+	case Analog_2:
+		return 2;
+		break;
+	case Analog_3:
+		return 3;
+		break;
+	case Analog_4:
+		return 4;
+		break;
+	case Analog_5:
+		return 5;
+		break;
+	case Analog_6:
+		return 6;
+		break;
+	case Analog_7:
+		return 7;
+		break;
+	case Analog_8:
+		return 8;
+		break;
+	case IME_1:
+		return 0;
+		break;
+	case IME_2:
+		return 1;
+		break;
+	case IME_3:
+		return 2;
+		break;
+	case IME_4:
+		return 3;
+		break;
+	case IME_5:
+		return 4;
+		break;
+	case IME_6:
+		return 5;
+		break;
+	case IME_7:
+		return 6;
+		break;
+	case IME_8:
+		return 7;
+		break;
+	}
+	return NULL;
 }
 
-int sensorGet(Sensor sensor){
-	return getSensorValue(sensor);
+AnalogSensor analogSensorInit(int port, bool inverted) {
+	AnalogSensor sensor;
+	sensor.port = port;
+	sensor.inverted = inverted;
+	return sensor;
+}
+
+int analogSensorRead(AnalogSensor sensor) {
+	if (!sensor.inverted) {
+		return analogRead(sensor.port);
+	} else {
+		return -analogRead(sensor.port);
+	}
+}
+
+//sensorConfig is used to set the multiplier for the gyro sensor
+//if that is set as the sensor type. otherwise it does nothing.
+//Call imeInitializeAll() before calling this function
+Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
+		bool inverted, int sensorConfig) {
+	Sensor sensor;
+	sensor.type = type;
+	sensor.port_1 = port_1;
+	sensor.port_2 = port_2;
+	sensor.inverted = inverted;
+	int decoded_p1 = portDecode(sensor.port_1);
+	int decoded_p2 = portDecode(sensor.port_2);
+
+	switch (sensor.type) {
+	case IntegratedMotorEncoder:
+		sensor.inverted = inverted;
+		break;
+	case QuadratureEncoder:
+		sensor.sensorData.encoder = encoderInit(decoded_p1, decoded_p2, false);
+		break;
+	case Sonar:
+		sensor.sensorData.sonar = ultrasonicInit(decoded_p1, decoded_p2);
+		break;
+	case Line:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Light:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Push_Button:
+		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		break;
+	case Limit_Switch:
+		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		break;
+	case Potentiometer:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Gyroscope:
+		sensor.sensorData.gyro = gyroInit(decoded_p1, sensorConfig);
+		break;
+	case Accelerometer:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	}
+	return sensor;
+}
+
+//if it is a limit switch or push button a 1 is returned if it is pressed
+int sensorGet(Sensor sensor) {
+	int value = NULL;
+
+	switch (sensor.type) {
+	case IntegratedMotorEncoder:
+		imeGet(portDecode(sensor.port_1), &value);
+		if (sensor.inverted) {
+			value = -value;
+		}
+		break;
+	case QuadratureEncoder:
+		value = encoderGet(sensor.sensorData.encoder);
+		break;
+	case Sonar:
+		value = ultrasonicGet(sensor.sensorData.sonar);
+		break;
+	case Line:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Light:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Push_Button:
+		value = bumpPressed(sensor.sensorData.pushButton);
+		break;
+	case Limit_Switch:
+		value = bumpPressed(sensor.sensorData.pushButton);
+		break;
+	case Potentiometer:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Gyroscope:
+		value = gyroGet(sensor.sensorData.gyro);
+		break;
+	case Accelerometer:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	}
+	return value;
 }
 
 ///////
 //PID//
 ///////
 
+PIDController pidControllerInit(float kp, float ki, float kd,
+		void (*setMotorSpeedFunction)(int), Sensor sensor) {
+	PIDController pid;
+	pid.kp = kp;
+	pid.ki = ki;
+	pid.kd = kd;
+	pid.setMotorSpeedFunction = setMotorSpeedFunction;
+	pid.ignoreIntegralBounds = true;
+	pid.sensor = sensor;
+	pid.integral_range = 1000;
+	pidControllerSetIntegralSpeedBounds(&pid, 0, 127);
+	return pid;
+}
+
+void pidControllerSetTarget(PIDController *controller, float target) {
+	controller->sensor_target = target;
+}
+
+void pidIgnoreIntegralBounds(PIDController *controller) {
+	controller->ignoreIntegralBounds = true;
+}
+
+void pidSetIntegralRange(PIDController *controller, float integralRange) {
+	controller->integral_range = integralRange;
+}
+
+void pidControllerSetIntegralSpeedBounds(PIDController *controller,
+		float integral_min, float integral_max) {
+	controller->integral_min = integral_min / controller->ki;
+	controller->integral_max = integral_max / controller->ki;
+	controller->ignoreIntegralBounds = false;
+}
+
+void pidStart(PIDController *controller) {
+	taskCreate(pidTask, TASK_DEFAULT_STACK_SIZE, controller,
+			TASK_PRIORITY_DEFAULT);
+}
+
+void pidTask(void *controller) {
+	PIDController pid = *((PIDController *) controller);
+	pid.target_reached = false;
+	while (!pid.target_reached) {
+		pid.last_error = pid.error;
+		pid.sensor_reading = sensorGet(pid.sensor);
+		pid.error = pid.sensor_target - pid.sensor_reading;
+		if (abs(pid.error) < pid.integral_range) {
+			pid.integral += pid.error;
+		} else {
+			pid.integral = 0;
+		}
+		pid.derivative = pid.error - pid.last_error;
+
+		if (!pid.ignoreIntegralBounds) {
+			if (abs(pid.integral) > pid.integral_max) {
+				if (pid.integral > 0) {
+					pid.integral = pid.integral_max;
+				} else {
+					pid.integral = -pid.integral_max;
+				}
+			} else if (abs(pid.integral) < pid.integral_min) {
+				if (pid.integral > 0) {
+					pid.integral = pid.integral_min;
+				} else {
+					pid.integral = -pid.integral_min;
+				}
+			}
+		}
+
+		if (abs(pid.error) <= abs(pid.error_tolerance)) {
+			pid.integral = 0;
+			pid.num_checks_passed++;
+			if(pid.num_checks_passed > 3){
+				pid.target_reached = true;
+			}
+		} else {
+			pid.num_checks_passed = 0;
+			pid.target_reached = false;
+		}
+		printf("Err: %.2f -- ISpd: %d -- I: %.2f\n\r", pid.error, pid.i_speed,
+				pid.integral);
+		pid.p_speed = pid.error * pid.kp;
+		pid.i_speed = pid.integral * pid.ki;
+		pid.d_speed = pid.derivative * pid.kd;
+		pid.motor_speed = pid.p_speed + pid.i_speed + pid.d_speed;
+		pid.setMotorSpeedFunction(pid.motor_speed);
+		delay(20);
+	}
+}
 
 /////////
 //Other//
 /////////
+
+int capMotorPower(int value) {
+	if (value > 127) {
+		return 127;
+	} else if (value < -127) {
+		return -127;
+	} else {
+		return value;
+	}
+}
 
 float getMainBatteryPower() {
 	return ((float) powerLevelMain()) / 1000.0f;

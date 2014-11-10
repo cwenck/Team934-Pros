@@ -307,8 +307,8 @@ bool bumperPressed(Bumper bumper) {
 }
 
 // Init limit switches in initializeIO()
-LimitSwitch limitSwitchInit(unsigned char port) {
-	LimitSwitch limitSwitch;
+PushButton limitSwitchInit(unsigned char port) {
+	PushButton limitSwitch;
 	limitSwitch.port = port;
 	pinMode(limitSwitch.port, INPUT);
 	return limitSwitch;
@@ -316,7 +316,7 @@ LimitSwitch limitSwitchInit(unsigned char port) {
 
 // digitalRead() returns LOW if Pressed or HIGH if released
 // the function returns true if the bumper is pressed
-bool limitSwitchPressed(LimitSwitch limitSwitch) {
+bool limitSwitchPressed(PushButton limitSwitch) {
 	if (digitalRead(limitSwitch.port) == LOW) {
 		return true;
 	}
