@@ -99,6 +99,223 @@ int readJoystick(JoyInput button) {
 	}
 }
 
+
+///////////
+//Sensors//
+///////////
+
+// Init limit switch / bumpers in initializeIO()
+PushButton pushButtonInit(unsigned char port) {
+	PushButton limitSwitch;
+	limitSwitch.port = port;
+	pinMode(limitSwitch.port, INPUT);
+	return limitSwitch;
+}
+
+// digitalRead() returns LOW if Pressed or HIGH if released
+// the function returns true if the bumper/limit switch is pressed
+bool bumpPressed(PushButton limitSwitch) {
+	if (digitalRead(limitSwitch.port) == LOW) {
+		return true;
+	}
+	return false;
+}
+
+int portDecode(SensorPort sensorPort) {
+	switch (sensorPort) {
+	case Digital_1:
+		return 1;
+		break;
+	case Digital_2:
+		return 2;
+		break;
+	case Digital_3:
+		return 3;
+		break;
+	case Digital_4:
+		return 4;
+		break;
+	case Digital_5:
+		return 5;
+		break;
+	case Digital_6:
+		return 6;
+		break;
+	case Digital_7:
+		return 7;
+		break;
+	case Digital_8:
+		return 8;
+		break;
+	case Digital_9:
+		return 9;
+		break;
+	case Digital_10:
+		return 10;
+		break;
+	case Digital_11:
+		return 11;
+		break;
+	case Digital_12:
+		return 12;
+		break;
+	case Analog_1:
+		return 1;
+		break;
+	case Analog_2:
+		return 2;
+		break;
+	case Analog_3:
+		return 3;
+		break;
+	case Analog_4:
+		return 4;
+		break;
+	case Analog_5:
+		return 5;
+		break;
+	case Analog_6:
+		return 6;
+		break;
+	case Analog_7:
+		return 7;
+		break;
+	case Analog_8:
+		return 8;
+		break;
+	case IME_1:
+		return 0;
+		break;
+	case IME_2:
+		return 1;
+		break;
+	case IME_3:
+		return 2;
+		break;
+	case IME_4:
+		return 3;
+		break;
+	case IME_5:
+		return 4;
+		break;
+	case IME_6:
+		return 5;
+		break;
+	case IME_7:
+		return 6;
+		break;
+	case IME_8:
+		return 7;
+		break;
+	}
+	return NULL;
+}
+
+AnalogSensor analogSensorInit(int port, bool inverted) {
+	AnalogSensor sensor;
+	sensor.port = port;
+	sensor.inverted = inverted;
+	return sensor;
+}
+
+int analogSensorRead(AnalogSensor sensor) {
+	if (!sensor.inverted) {
+		return analogRead(sensor.port);
+	} else {
+		return -analogRead(sensor.port);
+	}
+}
+
+//sensorConfig is used to set the multiplier for the gyro sensor
+//if that is set as the sensor type. otherwise it does nothing.
+//Call imeInitializeAll() before calling this function
+Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
+		bool inverted, int sensorConfig) {
+	Sensor sensor;
+	sensor.type = type;
+	sensor.port_1 = port_1;
+	sensor.port_2 = port_2;
+	sensor.inverted = inverted;
+	int decoded_p1 = portDecode(sensor.port_1);
+	int decoded_p2 = portDecode(sensor.port_2);
+
+	switch (sensor.type) {
+	case IntegratedMotorEncoder:
+		sensor.inverted = inverted;
+		break;
+	case QuadratureEncoder:
+		sensor.sensorData.quadEncoder = encoderInit(decoded_p1, decoded_p2, false);
+		break;
+	case Sonar:
+		sensor.sensorData.sonar = ultrasonicInit(decoded_p1, decoded_p2);
+		break;
+	case Line:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Light:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Push_Button:
+		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		break;
+	case Limit_Switch:
+		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		break;
+	case Potentiometer:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	case Gyroscope:
+		sensor.sensorData.gyro = gyroInit(decoded_p1, sensorConfig);
+		break;
+	case Accelerometer:
+		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		break;
+	}
+	return sensor;
+}
+
+//if it is a limit switch or push button a 1 is returned if it is pressed
+int sensorGet(Sensor sensor) {
+	int value = NULL;
+
+	switch (sensor.type) {
+	case IntegratedMotorEncoder:
+		imeGet(portDecode(sensor.port_1), &value);
+		if (sensor.inverted) {
+			value = -value;
+		}
+		break;
+	case QuadratureEncoder:
+		value = encoderGet(sensor.sensorData.encoder);
+		break;
+	case Sonar:
+		value = ultrasonicGet(sensor.sensorData.sonar);
+		break;
+	case Line:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Light:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Push_Button:
+		value = bumpPressed(sensor.sensorData.pushButton);
+		break;
+	case Limit_Switch:
+		value = bumpPressed(sensor.sensorData.pushButton);
+		break;
+	case Potentiometer:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	case Gyroscope:
+		value = gyroGet(sensor.sensorData.gyro);
+		break;
+	case Accelerometer:
+		value = analogSensorRead(sensor.sensorData.analog);
+		break;
+	}
+	return value;
+}
+
 //////////
 //Motors//
 //////////
@@ -110,35 +327,64 @@ void setMotorPower(Motor motor, int speed) {
 	motorSet(motor.port, speed);
 }
 
-Motor createMotor(unsigned char port, bool reversed) {
+Motor createMotor(MotorPort port, bool reversed) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.imeAddress = NULL;
+	motor.encoder = NULL;
+	motor.encoderType = NULL;
 	return motor;
 }
 
 //Integrated motor encoders closest to the cortex in the chain get assigned an address of 0
 //encoders futher down the line get an address that is incremented down the line
 //so the next further one from the cortex would be 1 then 2 then 3 etc.
-Motor createMotorWithIME(unsigned char port, unsigned char imeAddress,
-		bool reversed) {
+Motor createMotorWithIME(MotorPort port, bool reversed,
+		IntegratedEncoder encoder) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.imeAddress = imeAddress;
+	motor.encoder.quadEncoder = encoder;
+	motor.encoderType = QuadratureEncoder;
 	return motor;
 }
 
-void resetMotorIME(Motor motor) {
-	imeReset(motor.imeAddress);
+Motor createMotorWithIME(MotorPort port, bool reversed,
+		IntegratedEncoder encoder) {
+	Motor motor;
+	motor.port = port;
+	motor.reversed = reversed;
+	motor.encoder.ime = encoder;
+	motor.encoderType = IntegratedMotorEncoder;
+	return motor;
 }
 
-int readMotorIME(Motor motor) {
+void resetMotorEncoder(Motor motor) {
+	switch (motor.encoderType) {
+	case IntegratedMotorEncoder:
+		imeReset(motor.encoder.ime.imeAddress);
+		break;
+	case QuadratureEncoder:
+		encoderReset(motor.encoder.quadEncoder);
+		break;
+	}
+}
+
+int readMotorEncoder(Motor motor) {
 	int value;
-	imeGet(motor.imeAddress, &value);
-	if (motor.reversed) {
-		value = -value;
+	switch (motor.encoderType) {
+	case IntegratedMotorEncoder:
+		imeGet(motor.encoder.ime.imeAddress, &value);
+		if (motor.encoder.ime.inverted) {
+			value = -value;
+		}
+		break;
+	case QuadratureEncoder:
+		value = encoderGet(motor.encoder.quadEncoder);
+		if (motor.encoder.quadEncoder.inverted) {
+			value = -value;
+		}
+		break;
 	}
 	return value;
 }
@@ -294,222 +540,6 @@ void handleDriveOrStrafing() {
 	}
 }
 
-///////////
-//Sensors//
-///////////
-
-// Init limit switch / bumpers in initializeIO()
-PushButton pushButtonInit(unsigned char port) {
-	PushButton limitSwitch;
-	limitSwitch.port = port;
-	pinMode(limitSwitch.port, INPUT);
-	return limitSwitch;
-}
-
-// digitalRead() returns LOW if Pressed or HIGH if released
-// the function returns true if the bumper/limit switch is pressed
-bool bumpPressed(PushButton limitSwitch) {
-	if (digitalRead(limitSwitch.port) == LOW) {
-		return true;
-	}
-	return false;
-}
-
-int portDecode(SensorPort sensorPort) {
-	switch (sensorPort) {
-	case Digital_1:
-		return 1;
-		break;
-	case Digital_2:
-		return 2;
-		break;
-	case Digital_3:
-		return 3;
-		break;
-	case Digital_4:
-		return 4;
-		break;
-	case Digital_5:
-		return 5;
-		break;
-	case Digital_6:
-		return 6;
-		break;
-	case Digital_7:
-		return 7;
-		break;
-	case Digital_8:
-		return 8;
-		break;
-	case Digital_9:
-		return 9;
-		break;
-	case Digital_10:
-		return 10;
-		break;
-	case Digital_11:
-		return 11;
-		break;
-	case Digital_12:
-		return 12;
-		break;
-	case Analog_1:
-		return 1;
-		break;
-	case Analog_2:
-		return 2;
-		break;
-	case Analog_3:
-		return 3;
-		break;
-	case Analog_4:
-		return 4;
-		break;
-	case Analog_5:
-		return 5;
-		break;
-	case Analog_6:
-		return 6;
-		break;
-	case Analog_7:
-		return 7;
-		break;
-	case Analog_8:
-		return 8;
-		break;
-	case IME_1:
-		return 0;
-		break;
-	case IME_2:
-		return 1;
-		break;
-	case IME_3:
-		return 2;
-		break;
-	case IME_4:
-		return 3;
-		break;
-	case IME_5:
-		return 4;
-		break;
-	case IME_6:
-		return 5;
-		break;
-	case IME_7:
-		return 6;
-		break;
-	case IME_8:
-		return 7;
-		break;
-	}
-	return NULL;
-}
-
-AnalogSensor analogSensorInit(int port, bool inverted) {
-	AnalogSensor sensor;
-	sensor.port = port;
-	sensor.inverted = inverted;
-	return sensor;
-}
-
-int analogSensorRead(AnalogSensor sensor) {
-	if (!sensor.inverted) {
-		return analogRead(sensor.port);
-	} else {
-		return -analogRead(sensor.port);
-	}
-}
-
-//sensorConfig is used to set the multiplier for the gyro sensor
-//if that is set as the sensor type. otherwise it does nothing.
-//Call imeInitializeAll() before calling this function
-Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
-		bool inverted, int sensorConfig) {
-	Sensor sensor;
-	sensor.type = type;
-	sensor.port_1 = port_1;
-	sensor.port_2 = port_2;
-	sensor.inverted = inverted;
-	int decoded_p1 = portDecode(sensor.port_1);
-	int decoded_p2 = portDecode(sensor.port_2);
-
-	switch (sensor.type) {
-	case IntegratedMotorEncoder:
-		sensor.inverted = inverted;
-		break;
-	case QuadratureEncoder:
-		sensor.sensorData.encoder = encoderInit(decoded_p1, decoded_p2, false);
-		break;
-	case Sonar:
-		sensor.sensorData.sonar = ultrasonicInit(decoded_p1, decoded_p2);
-		break;
-	case Line:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
-		break;
-	case Light:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
-		break;
-	case Push_Button:
-		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
-		break;
-	case Limit_Switch:
-		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
-		break;
-	case Potentiometer:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
-		break;
-	case Gyroscope:
-		sensor.sensorData.gyro = gyroInit(decoded_p1, sensorConfig);
-		break;
-	case Accelerometer:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
-		break;
-	}
-	return sensor;
-}
-
-//if it is a limit switch or push button a 1 is returned if it is pressed
-int sensorGet(Sensor sensor) {
-	int value = NULL;
-
-	switch (sensor.type) {
-	case IntegratedMotorEncoder:
-		imeGet(portDecode(sensor.port_1), &value);
-		if (sensor.inverted) {
-			value = -value;
-		}
-		break;
-	case QuadratureEncoder:
-		value = encoderGet(sensor.sensorData.encoder);
-		break;
-	case Sonar:
-		value = ultrasonicGet(sensor.sensorData.sonar);
-		break;
-	case Line:
-		value = analogSensorRead(sensor.sensorData.analog);
-		break;
-	case Light:
-		value = analogSensorRead(sensor.sensorData.analog);
-		break;
-	case Push_Button:
-		value = bumpPressed(sensor.sensorData.pushButton);
-		break;
-	case Limit_Switch:
-		value = bumpPressed(sensor.sensorData.pushButton);
-		break;
-	case Potentiometer:
-		value = analogSensorRead(sensor.sensorData.analog);
-		break;
-	case Gyroscope:
-		value = gyroGet(sensor.sensorData.gyro);
-		break;
-	case Accelerometer:
-		value = analogSensorRead(sensor.sensorData.analog);
-		break;
-	}
-	return value;
-}
-
 ///////
 //PID//
 ///////
@@ -585,7 +615,7 @@ void pidTask(void *controller) {
 		if (abs(pid.error) <= abs(pid.error_tolerance)) {
 			pid.integral = 0;
 			pid.num_checks_passed++;
-			if(pid.num_checks_passed > 3){
+			if (pid.num_checks_passed > 3) {
 				pid.target_reached = true;
 			}
 		} else {
