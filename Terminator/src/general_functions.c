@@ -188,34 +188,34 @@ Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 
 	switch (sensor.type) {
 	case IntegratedMotorEncoder:
-		sensor.inverted = inverted;
+		sensor.sensorData.ime = integratedEncoderInit(sensor.port_1.imePort, inverted);
 		break;
 	case QuadratureEncoder:
-		sensor.sensorData.quadEncoder = quadEncoderInit(sensor.port_1, sensor.port_2, false);
+		sensor.sensorData.quadEncoder = quadEncoderInit(sensor.port_1.digitalPort, sensor.port_1.digitalPort, inverted);
 		break;
 	case Sonar:
-		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1, sensor.port_2);
+		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1.digitalPort, sensor.port_2.digitalPort);
 		break;
 	case Line:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort, inverted);
 		break;
 	case Light:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort, inverted);
 		break;
-	case Push_Button:
-		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1);
+	case Bumper:
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1.digitalPort);
 		break;
 	case Limit_Switch:
-		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1);
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1.digitalPort);
 		break;
 	case Potentiometer:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort, inverted);
 		break;
 	case Gyroscope:
-		sensor.sensorData.gyro = gyroInit(sensor.port_1, sensorConfig);
+		sensor.sensorData.gyro = gyroInit(sensor.port_1.analogPort, sensorConfig);
 		break;
 	case Accelerometer:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort, inverted);
 		break;
 	}
 	return sensor;
@@ -241,7 +241,7 @@ int sensorGet(Sensor sensor) {
 	case Light:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
-	case Push_Button:
+	case Bumper:
 		value = bumpPressed(sensor.sensorData.pushButton);
 		break;
 	case Limit_Switch:
@@ -275,7 +275,6 @@ Motor createMotor(MotorPort port, bool reversed) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder_data = NULL;
 	motor.encoderType = NULL;
 	return motor;
 }
@@ -318,7 +317,7 @@ void resetMotorEncoder(Motor motor) {
 }
 
 int motorEncoderGet(Motor motor) {
-	int value;
+	int value = NULL;
 	switch (motor.encoderType) {
 	case IntegratedMotorEncoder:
 		value = integratedencoderGet(motor.encoder_data.ime);

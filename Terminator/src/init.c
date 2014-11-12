@@ -63,15 +63,15 @@ void initialize() {
 	liftEncoder = encoderInit(1, 2, false);
 
 	//Init Drive Motors
-	frontLeftWheel = createMotorWithIME(8, 0, true);
-	frontRightWheel = createMotorWithIME(9, 1, true);
-	backLeftWheel = createMotorWithIME(6, 2, false);
-	backRightWheel = createMotorWithIME(7, 3, true);
+//	frontLeftWheel = createMotorWithIME(8, 0, true);
+//	frontRightWheel = createMotorWithIME(9, 1, true);
+//	backLeftWheel = createMotorWithIME(6, 2, false);
+//	backRightWheel = createMotorWithIME(7, 3, true);
 
 	//Init Lift Motors
 	frontLeftLift = createMotor(2, true);
-	backLeftLift = createMotor(3, false);
-	frontRightLift = createMotor(4, true);
+	backLeftLift = createMotor(3, true);
+	frontRightLift = createMotor(4, false);
 	backRightLift = createMotor(5, true);
 
 

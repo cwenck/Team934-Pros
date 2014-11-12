@@ -24,7 +24,7 @@ typedef enum {
 	Sonar,					//Digital
 	Line,					//Analog
 	Light,					//Analog
-	Push_Button,			//Digital
+	Bumper,					//Digital
 	Limit_Switch,			//Digital
 	Potentiometer,			//Analog
 	Gyroscope,				//Analog

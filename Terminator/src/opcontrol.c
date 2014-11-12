@@ -59,7 +59,7 @@ void runMotor(int speed) {
 void operatorControl() {
 //	encoderReset(liftEncoder);
 //	Sensor encoder = sensorInit(QuadratureEncoder, Digital_3, Digital_4, false, NULL);
-	Sensor gyro = sensorInit(Gyroscope, Analog_1, NULL, false, NULL);
+//	Sensor gyro = sensorInit(Gyroscope, Analog_1, NULL, false, NULL);
 //	Encoder encoder = encoderInit(3, 4, false);
 //	encoderReset(encoder);
 //	PIDController pid = pidControllerInit(2 , .1, .6, runMotor, encoder);
@@ -69,11 +69,13 @@ void operatorControl() {
 	while (1) {
 //		handleDriveInput();
 //		handleDriveOrStrafing();
-//		handleLiftInput();
+		handleLiftInput();
 
 //		int speed = readJoystick(forward_backward_drive);
-		printf("%d\n\r", sensorGet(gyro));
+//		printf("%d\n\r", sensorGet(gyro));
 //		printf("%d\n\r", encoderGet(encoder));
+//		printf("%d\n\r", speed);
+//		setLiftPower()
 //		runMotor(speed);
 
 		delay(20);
