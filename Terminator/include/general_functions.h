@@ -93,8 +93,7 @@ typedef struct {
 } IntegratedEncoder;
 
 typedef struct {
-	unsigned char top_port;
-	unsigned char bottom_port;
+	Encoder encoder_data;
 	bool inverted;
 } QuadEncoder;
 
@@ -133,17 +132,19 @@ extern Encoder liftEncoder;
 //functions
 
 //used for Bumpers and limit switches
-PushButton pushButtonInit(unsigned char port);
+PushButton pushButtonInit(DigitalPort port);
 bool pushButtonPressed(PushButton pushButton);
 
-AnalogSensor analogSensorInit(unsigned char port, bool inverted);
-int analogSensorRead(AnalogSensor sensor);
+AnalogSensor analogSensorInit(AnalogPort port, bool inverted);
+int analogSensorGet(AnalogSensor sensor);
 
 QuadEncoder quadEncoderInit(DigitalPort topPort, DigitalPort bottomPort, bool inverted);
-int quadencoderRead(QuadEncoder encoder);
+int quadEncoderGet(QuadEncoder encoder);
+void quadEncoderReset(QuadEncoder encoder);
 
 IntegratedEncoder integratedEncoderInit(IMEPort port, bool inverted);
-int integratedencoderRead(IntegratedEncoder encoder);
+int integratedencoderGet(IntegratedEncoder encoder);
+void integratedEncoderReset(IntegratedEncoder encoder);
 
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 		bool inverted, int sensorConfig);
@@ -160,7 +161,7 @@ typedef struct {
 	union {
 		QuadEncoder quadEncoder;
 		IntegratedEncoder ime;
-	} encoder;
+	} encoder_data;
 	bool reversed;
 } Motor;
 
@@ -184,7 +185,7 @@ Motor createMotor(MotorPort port, bool reversed);
 Motor createMotorWithIME(MotorPort port, bool reversed, IntegratedEncoder encoder);
 Motor createMotorWithEncoder(MotorPort port, bool reversed, QuadEncoder encoder);
 void resetMotorEncoder(Motor motor);
-int readMotorEncoder(Motor motor);
+int motorEncoderGet(Motor motor);
 /////////
 //Drive//
 /////////

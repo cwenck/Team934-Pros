@@ -105,7 +105,7 @@ int readJoystick(JoyInput button) {
 ///////////
 
 // Init limit switch / bumpers in initializeIO()
-PushButton pushButtonInit(unsigned char port) {
+PushButton pushButtonInit(DigitalPort port) {
 	PushButton limitSwitch;
 	limitSwitch.port = port;
 	pinMode(limitSwitch.port, INPUT);
@@ -121,109 +121,57 @@ bool bumpPressed(PushButton limitSwitch) {
 	return false;
 }
 
-int portDecode(SensorPort sensorPort) {
-	switch (sensorPort) {
-	case Digital_1:
-		return 1;
-		break;
-	case Digital_2:
-		return 2;
-		break;
-	case Digital_3:
-		return 3;
-		break;
-	case Digital_4:
-		return 4;
-		break;
-	case Digital_5:
-		return 5;
-		break;
-	case Digital_6:
-		return 6;
-		break;
-	case Digital_7:
-		return 7;
-		break;
-	case Digital_8:
-		return 8;
-		break;
-	case Digital_9:
-		return 9;
-		break;
-	case Digital_10:
-		return 10;
-		break;
-	case Digital_11:
-		return 11;
-		break;
-	case Digital_12:
-		return 12;
-		break;
-	case Analog_1:
-		return 1;
-		break;
-	case Analog_2:
-		return 2;
-		break;
-	case Analog_3:
-		return 3;
-		break;
-	case Analog_4:
-		return 4;
-		break;
-	case Analog_5:
-		return 5;
-		break;
-	case Analog_6:
-		return 6;
-		break;
-	case Analog_7:
-		return 7;
-		break;
-	case Analog_8:
-		return 8;
-		break;
-	case IME_1:
-		return 0;
-		break;
-	case IME_2:
-		return 1;
-		break;
-	case IME_3:
-		return 2;
-		break;
-	case IME_4:
-		return 3;
-		break;
-	case IME_5:
-		return 4;
-		break;
-	case IME_6:
-		return 5;
-		break;
-	case IME_7:
-		return 6;
-		break;
-	case IME_8:
-		return 7;
-		break;
-	}
-	return NULL;
-}
-
-AnalogSensor analogSensorInit(int port, bool inverted) {
+AnalogSensor analogSensorInit(AnalogPort port, bool inverted) {
 	AnalogSensor sensor;
 	sensor.port = port;
 	sensor.inverted = inverted;
 	return sensor;
 }
 
-int analogSensorRead(AnalogSensor sensor) {
+int analogSensorGet(AnalogSensor sensor) {
 	if (!sensor.inverted) {
 		return analogRead(sensor.port);
 	} else {
 		return -analogRead(sensor.port);
 	}
+}
+
+QuadEncoder quadEncoderInit(DigitalPort topPort, DigitalPort bottomPort, bool inverted){
+	QuadEncoder quad;
+	quad.encoder_data = encoderInit(topPort, bottomPort, false);
+	quad.inverted = inverted;
+	return quad;
+}
+
+int quadEncoderGet(QuadEncoder encoder){
+	int value = encoderGet(encoder.encoder_data);
+	if(encoder.inverted){
+		value = - value;
+	}
+	return value;
+}
+
+void quadEncoderReset(QuadEncoder encoder){
+	encoderReset(encoder.encoder_data);
+}
+
+IntegratedEncoder integratedEncoderInit(IMEPort port, bool inverted){
+	IntegratedEncoder ime;
+	ime.imeAddress = port;
+	ime.inverted = inverted;
+	return ime;
+}
+int integratedencoderGet(IntegratedEncoder encoder){
+	int value;
+	imeGet(encoder.imeAddress, &value);
+	if(encoder.inverted){
+		value = - value;
+	}
+	return value;
+}
+
+void integratedEncoderReset(IntegratedEncoder encoder){
+	imeReset(encoder.imeAddress);
 }
 
 //sensorConfig is used to set the multiplier for the gyro sensor
@@ -236,39 +184,38 @@ Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 	sensor.port_1 = port_1;
 	sensor.port_2 = port_2;
 	sensor.inverted = inverted;
-	int decoded_p1 = portDecode(sensor.port_1);
-	int decoded_p2 = portDecode(sensor.port_2);
+
 
 	switch (sensor.type) {
 	case IntegratedMotorEncoder:
 		sensor.inverted = inverted;
 		break;
 	case QuadratureEncoder:
-		sensor.sensorData.quadEncoder = encoderInit(decoded_p1, decoded_p2, false);
+		sensor.sensorData.quadEncoder = quadEncoderInit(sensor.port_1, sensor.port_2, false);
 		break;
 	case Sonar:
-		sensor.sensorData.sonar = ultrasonicInit(decoded_p1, decoded_p2);
+		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1, sensor.port_2);
 		break;
 	case Line:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
 		break;
 	case Light:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
 		break;
 	case Push_Button:
-		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1);
 		break;
 	case Limit_Switch:
-		sensor.sensorData.pushButton = pushButtonInit(decoded_p1);
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1);
 		break;
 	case Potentiometer:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
 		break;
 	case Gyroscope:
-		sensor.sensorData.gyro = gyroInit(decoded_p1, sensorConfig);
+		sensor.sensorData.gyro = gyroInit(sensor.port_1, sensorConfig);
 		break;
 	case Accelerometer:
-		sensor.sensorData.analog = analogSensorInit(decoded_p1, inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1, inverted);
 		break;
 	}
 	return sensor;
@@ -280,22 +227,19 @@ int sensorGet(Sensor sensor) {
 
 	switch (sensor.type) {
 	case IntegratedMotorEncoder:
-		imeGet(portDecode(sensor.port_1), &value);
-		if (sensor.inverted) {
-			value = -value;
-		}
+		value = integratedencoderGet(sensor.sensorData.ime);
 		break;
 	case QuadratureEncoder:
-		value = encoderGet(sensor.sensorData.encoder);
+		value = quadEncoderGet(sensor.sensorData.quadEncoder);
 		break;
 	case Sonar:
 		value = ultrasonicGet(sensor.sensorData.sonar);
 		break;
 	case Line:
-		value = analogSensorRead(sensor.sensorData.analog);
+		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Light:
-		value = analogSensorRead(sensor.sensorData.analog);
+		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Push_Button:
 		value = bumpPressed(sensor.sensorData.pushButton);
@@ -304,13 +248,13 @@ int sensorGet(Sensor sensor) {
 		value = bumpPressed(sensor.sensorData.pushButton);
 		break;
 	case Potentiometer:
-		value = analogSensorRead(sensor.sensorData.analog);
+		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Gyroscope:
 		value = gyroGet(sensor.sensorData.gyro);
 		break;
 	case Accelerometer:
-		value = analogSensorRead(sensor.sensorData.analog);
+		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	}
 	return value;
@@ -331,7 +275,7 @@ Motor createMotor(MotorPort port, bool reversed) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder = NULL;
+	motor.encoder_data = NULL;
 	motor.encoderType = NULL;
 	return motor;
 }
@@ -344,46 +288,46 @@ Motor createMotorWithIME(MotorPort port, bool reversed,
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder.quadEncoder = encoder;
+	motor.encoder_data.ime = encoder;
 	motor.encoderType = QuadratureEncoder;
 	return motor;
 }
 
-Motor createMotorWithIME(MotorPort port, bool reversed,
-		IntegratedEncoder encoder) {
+Motor createMotorWithEncoder(MotorPort port, bool reversed,
+		QuadEncoder encoder) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder.ime = encoder;
-	motor.encoderType = IntegratedMotorEncoder;
+	motor.encoder_data.quadEncoder = encoder;
+	motor.encoderType = QuadratureEncoder;
 	return motor;
 }
 
 void resetMotorEncoder(Motor motor) {
 	switch (motor.encoderType) {
 	case IntegratedMotorEncoder:
-		imeReset(motor.encoder.ime.imeAddress);
+		integratedEncoderReset(motor.encoder_data.ime);
 		break;
 	case QuadratureEncoder:
-		encoderReset(motor.encoder.quadEncoder);
+		quadEncoderReset(motor.encoder_data.quadEncoder);
+		break;
+	default:
+		print("Invalid Encoder Type!\n\r");
 		break;
 	}
 }
 
-int readMotorEncoder(Motor motor) {
+int motorEncoderGet(Motor motor) {
 	int value;
 	switch (motor.encoderType) {
 	case IntegratedMotorEncoder:
-		imeGet(motor.encoder.ime.imeAddress, &value);
-		if (motor.encoder.ime.inverted) {
-			value = -value;
-		}
+		value = integratedencoderGet(motor.encoder_data.ime);
 		break;
 	case QuadratureEncoder:
-		value = encoderGet(motor.encoder.quadEncoder);
-		if (motor.encoder.quadEncoder.inverted) {
-			value = -value;
-		}
+		value = quadEncoderGet(motor.encoder_data.quadEncoder);
+		break;
+	default:
+		print("Invalid Encoder Type!\n\r");
 		break;
 	}
 	return value;
