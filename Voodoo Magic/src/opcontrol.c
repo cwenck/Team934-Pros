@@ -52,14 +52,10 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-	encoderReset(liftEncoder);
 	while (1) {
-
-//		handleDriveInput();
-//		handleDriveOrStrafing();
-//		handleLiftInput();
-		int speed = readJoystick(forward_backward_drive);
-		motorSet(4, speed);
+		handleDriveInput();
+		handleDriveOrStrafing();
+		handleLiftInput();
 		delay(20);
 	}
 }
