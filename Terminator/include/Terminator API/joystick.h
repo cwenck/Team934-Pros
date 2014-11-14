@@ -1,10 +1,3 @@
-/*
- * joystick.h
- *
- *  Created on: Nov 12, 2014
- *      Author: guywenck
- */
-
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 

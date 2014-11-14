@@ -9,10 +9,11 @@
 #define TERMINATOR_API_H_
 
 #include "sensors.h"
-#include "joystick.h"
-#include "util.h"
 #include "motor.h"
-#include "pid.h"
+#include "joystick.h"
 #include "robot_control.h"
+#include "util.h"
+#include "pid.h"
+#include "variables.h"
 
 #endif /* TERMINATOR_API_H_ */
