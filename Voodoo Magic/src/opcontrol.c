@@ -52,8 +52,9 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
+	executeAutonIfJumperInPort(Digital_12);
 	while (1) {
-		handleDriveInput();
+//		handleDriveInput();
 		handleDriveOrStrafing();
 		handleLiftInput();
 		delay(20);

@@ -44,6 +44,9 @@
  */
 void initializeIO() {
 	setTeamName("934");
+
+	//set pin mode for jumper autonomus
+	pinMode(Digital_12, INPUT);
 }
 
 /*
@@ -60,30 +63,41 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-//	QuadEncoder test;
-//	test = quadEncoderInit(Digital_1, Digital_2, false);
-//	liftEncoder = test;
-//	liftEncoder = quadEncoderInit(Digital_1, Digital_2, false);
+	liftEncoder = quadEncoderInit(Digital_1, Digital_2, false);
+
+	//Drive Integrated Encoders
+	IntegratedEncoder frontLeftWheelEncoder = integratedEncoderInit(0, false);
+	IntegratedEncoder frontRightWheelEncoder = integratedEncoderInit(1, false);
+	IntegratedEncoder backLeftWheelEncoder = integratedEncoderInit(2, false);
+	IntegratedEncoder backRightWheelEncoder = integratedEncoderInit(3, false);
+
 	//Init Drive Motors
-//	frontLeftWheel = createMotorWithIME(8, 0, true);
-//	frontRightWheel = createMotorWithIME(9, 1, true);
-//	backLeftWheel = createMotorWithIME(6, 2, false);
-//	backRightWheel = createMotorWithIME(7, 3, true);
+	frontLeftWheel = createMotorWithIME(8, false, &frontLeftWheelEncoder);
+	frontRightWheel = createMotorWithIME(9, false, &frontRightWheelEncoder);
+	backLeftWheel = createMotorWithIME(6, false, &backLeftWheelEncoder);
+	backRightWheel = createMotorWithIME(7, true, &backRightWheelEncoder);
 //
 //	//Init Lift Motors
-//	topLeftLift = createMotor(5, false);
-//	middleLeftLift = createMotor(4, true);
-//	bottomLeftLift = createMotor(3, false);
+//	topLeftLift = createMotor(5, true);
+//	middleLeftLift = createMotor(4, false);
+//	bottomLeftLift = createMotor(3, true);
 //	topRightLift = createMotor(10, false);
 //	middleRightLift = createMotor(2, true);
 //	bottomRightLift = createMotor(1, false);
 
+	topLeftLift = createMotor(5, false);
+	middleLeftLift = createMotor(4, true);
+	bottomLeftLift = createMotor(3, false);
+	topRightLift = createMotor(10, true);
+	middleRightLift = createMotor(2, false);
+	bottomRightLift = createMotor(1, true);
+
 	//Init Controller Buttons
-//	liftUp = createButton(5, JOY_UP);
-//	liftDown = createButton(5, JOY_DOWN);
-//
-//	forward_backward_drive = createAxis(3);
-//	left_right_drive = createAxis(4);
-//	forward_backward_strafe = createAxis(2);
-//	left_right_strafe = createAxis(1);
+	liftUp = createButton(5, JOY_UP);
+	liftDown = createButton(5, JOY_DOWN);
+
+	forward_backward_drive = createAxis(3);
+	left_right_drive = createAxis(4);
+	forward_backward_strafe = createAxis(2);
+	left_right_strafe = createAxis(1);
 }

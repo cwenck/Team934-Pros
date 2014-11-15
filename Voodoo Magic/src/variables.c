@@ -5,7 +5,7 @@
 /////////////
 
 //Lift liftEncoder
-Encoder liftEncoder;
+QuadEncoder liftEncoder;
 
 //Init Drive Motors
 Motor frontLeftWheel;
@@ -14,10 +14,12 @@ Motor backLeftWheel;
 Motor backRightWheel;
 
 //Init Lift Motors
-Motor frontLeftLift;
-Motor backLeftLift;
-Motor frontRightLift;
-Motor backRightLift;
+Motor topLeftLift;
+Motor middleLeftLift;
+Motor bottomLeftLift;
+Motor topRightLift;
+Motor middleRightLift;
+Motor bottomRightLift;
 
 //Init Controller Buttons
 JoyInput liftUp;
