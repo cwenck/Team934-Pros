@@ -58,11 +58,20 @@ void lcdDisplayFormattedCenteredString(FILE *lcdPort, unsigned char line,
 
 	va_start(arg, formatString);
 	{
-		int len = vsnprintf(line_chars, 16, formatString, arg);
-		print(line_chars);
-		print("\n\r");
-		printf("Len: %d\n\r", len);
+		vsnprintf(line_chars, 16, formatString, arg);
 	}
 	va_end(arg);
 	lcdDisplayCenteredString(lcdPort, line, line_chars);
+}
+
+void lcdSetup(FILE *lcdPort){
+	lcdInit(lcdPort);
+	lcdClear(lcdPort);
+	lcdSetBacklight(lcdPort, true);
+}
+
+
+void lcdDisplayBatteryStatus(FILE *lcdPort){
+	lcdDisplayFormattedCenteredString(uart1, 1, "Main: %.2fV", getMainBatteryPower());
+	lcdDisplayFormattedCenteredString(uart1, 2, "%c             %c", LCD_LEFT_TRIANGLE_ARROW, LCD_RIGHT_TRIANGLE_ARROW);
 }
