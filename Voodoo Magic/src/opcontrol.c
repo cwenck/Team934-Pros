@@ -52,11 +52,44 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-	executeAutonIfJumperInPort(Digital_12);
+//	executeAutonIfJumperInPort(Digital_12);
+	bool playing = false;
+	int songNum = 0;
 	while (1) {
-//		handleDriveInput();
-		handleDriveOrStrafing();
-		handleLiftInput();
-		delay(20);
+//		lcdDisplayBatteryStatus(uart1 );
+		if (lcdIsLeftButtonPressed(uart1 )) {
+			songNum--;
+		}
+		if (lcdIsRightButtonPressed(uart1 )) {
+			songNum++;
+		}
+		if (songNum >= songsGetTotal()) {
+			songNum = 0;
+		} else if (songNum < 0) {
+			songNum = songsGetTotal() - 1;
+		}
+//		lcdDisplayFormattedCenteredString(uart1, 1, "Song %d", songNum + 1);
+		lcdDisplayFormattedCenteredString(uart1, 1, songGetTitle(songNum));
+		if (lcdIsCenterButtonPressed(uart1 ) && !playing) {
+			playing = true;
+			lcdClear(uart1 );
+			lcdDisplayCenteredString(uart1, 1, "Playing...");
+			speakerPlayRtttl(songGet(songNum));
+			playing = false;
+		}
+//		for (SensorPort i = Analog_1; i <= Analog_8; i++) {
+//			int value = analogRead(i - 12);
+//			int value_2 = digitalRead(i);
+//			printf("%d: %d - %d\n\r", i - 12, value, value_2);
+//		}
+//		print("--------------------\n\r");
+//		FILE *auton_file = fopen("AUTON", "w");//		*auton_file
+//		int value = analogRead(1);
+//		bool value = digitalRead(1);
+//		printf("%d\n\r", value);
+//		printf("L:%d C:%d R:%d\n\r", lcdIsLeftButtonPressed(uart1), lcdIsCenterButtonPressed(uart1), lcdIsRightButtonPressed(uart1));
+//		handleDriveOrStrafing();
+//		handleLiftInput();
+		delay(300);
 	}
 }

@@ -2,8 +2,11 @@
 #define VARIABLES_H_
 
 //Sensors
-extern QuadEncoder liftEncoder;
+extern Sensor liftEncoder;
 
+extern PIDController liftPID;
+extern PIDController strafePID;
+extern PIDController drivePID;
 
 //Motors
 extern Motor frontLeftWheel;

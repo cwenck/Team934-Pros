@@ -6,5 +6,7 @@
 void strafeLeft();
 void strafeRight();
 void driveBack();
+void blueCubeOnPost();
+void redCubeOnPost();
 
 #endif /* AUTON_H_ */

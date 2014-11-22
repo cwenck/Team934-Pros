@@ -7,6 +7,10 @@
 //Motors//
 //////////
 
+typedef enum {
+	high_speed, high_torque
+} MotorType;
+
 typedef struct {
 	unsigned char port;
 	SensorType encoderType;
@@ -24,9 +28,13 @@ extern unsigned char connectedIntegratedMotorEncoders;
 void setMotorPower(Motor motor, int speed);
 
 Motor createMotor(MotorPort port, bool reversed);
-Motor createMotorWithIME(MotorPort port, bool reversed, IntegratedEncoder *encoder);
-Motor createMotorWithEncoder(MotorPort port, bool reversed, QuadEncoder *encoder);
+Motor createMotorWithIME(MotorPort port, bool reversed,
+		IntegratedEncoder *encoder);
+Motor createMotorWithEncoder(MotorPort port, bool reversed,
+		QuadEncoder *encoder);
 void resetMotorEncoder(Motor motor);
 int motorEncoderGet(Motor motor);
+QuadEncoder* motorQuadEncoderGetPointer(Motor *motor);
+IntegratedEncoder* motorIntegratedEncoderGetPointer(Motor *motor);
 
 #endif /* MOTOR_H_ */

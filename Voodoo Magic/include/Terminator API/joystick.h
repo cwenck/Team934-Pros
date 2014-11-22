@@ -51,6 +51,4 @@ int readJoystick(JoyInput input);
 unsigned char getNumConnectedJoysticks();
 
 
-
-
 #endif /* JOYSTICK_H_ */

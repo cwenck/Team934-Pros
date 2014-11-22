@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-typedef enum {
+typedef enum SensorType{
 	IntegratedMotorEncoder,	//IC2
 	QuadratureEncoder,		//Digital
 	Sonar,					//Digital
@@ -20,7 +20,7 @@ typedef enum {
 	Accelerometer			//Analog
 } SensorType;
 
-typedef enum {
+typedef enum MotorPort{
 	Motor_1 = 1,
 	Motor_2 = 2,
 	Motor_3 = 3,
@@ -33,7 +33,18 @@ typedef enum {
 	Motor_10 = 10
 } MotorPort;
 
-typedef enum {
+typedef enum IMEAddr{
+	IME_1 = 0,
+	IME_2 = 1,
+	IME_3 = 2,
+	IME_4 = 3,
+	IME_5 = 4,
+	IME_6 = 5,
+	IME_7 = 6,
+	IME_8 = 7
+} IMEAddr;
+
+typedef enum SensorPort{
 	Digital_1 = 1,
 	Digital_2 = 2,
 	Digital_3 = 3,
@@ -45,53 +56,41 @@ typedef enum {
 	Digital_9 = 9,
 	Digital_10 = 10,
 	Digital_11 = 11,
-	Digital_12 = 12
-} DigitalPort;
-
-typedef enum {
-	Analog_1 = 1,
-	Analog_2 = 2,
-	Analog_3 = 3,
-	Analog_4 = 4,
-	Analog_5 = 5,
-	Analog_6 = 6,
-	Analog_7 = 7,
-	Analog_8 = 8
-} AnalogPort;
-
-typedef enum {
-	IME_1 = 0,
-	IME_2 = 1,
-	IME_3 = 2,
-	IME_4 = 3,
-	IME_5 = 4,
-	IME_6 = 5,
-	IME_7 = 6,
-	IME_8 = 7
-} IMEPort;
-
-typedef union {
-	AnalogPort analogPort;
-	DigitalPort digitalPort;
-	IMEPort imePort;
+	Digital_12 = 12,
+	Analog_1 = 13,
+	Analog_2 = 14,
+	Analog_3 = 15,
+	Analog_4 = 16,
+	Analog_5 = 17,
+	Analog_6 = 18,
+	Analog_7 = 19,
+	Analog_8 = 20
 } SensorPort;
 
-typedef struct {
-	unsigned char imeAddress;
+typedef struct CortexPort{
+	SensorPort port;
+	unsigned char mode;
+	bool analogCapabilites;
+} CortexPort;
+
+typedef struct IntegratedEncoder{
+	IMEAddr imeAddress;
 	bool inverted;
 } IntegratedEncoder;
 
-typedef struct {
+typedef struct QuadEncoder{
+	SensorPort top;
+	SensorPort bottom;
 	Encoder encoder_data;
 	bool inverted;
 } QuadEncoder;
 
-typedef struct {
-	unsigned char port;
+typedef struct PushButton{
+	SensorPort port;
 } PushButton;
 
-typedef struct {
-	unsigned char port;
+typedef struct AnalogSensor{
+	SensorPort port;
 	bool inverted;
 } AnalogSensor;
 
@@ -99,15 +98,17 @@ typedef struct {
 //	DigitalPort port;
 //} Jumper;
 
-typedef struct {
+typedef struct Sensor{
 	SensorType type;
-	SensorPort port_1;
 
+	SensorPort port_1;
 	//Only used for Sonar and Quadrature encoders
 	//order does not matter for the quadrature encoder,
 	//it only reverses the direction of the rotation
 	//This should be NULL if it is not one of those two sensor types.
 	SensorPort port_2;
+	IMEAddr imeAddr;
+
 	bool inverted;
 	union {
 		IntegratedEncoder ime;
@@ -119,15 +120,23 @@ typedef struct {
 	} sensorData;
 } Sensor;
 
+void cortexPortsInit();
+CortexPort* cortexPortForSensorPort(SensorPort port);
+
+bool portIsAnalog(SensorPort port);
+void portSetPinMode(SensorPort port, unsigned char mode);
+int portRead(SensorPort port);
+void portWrite(SensorPort port, bool value);
+
 //used for Bumpers and limit switches
-PushButton pushButtonInit(DigitalPort port);
+PushButton pushButtonInit(SensorPort port);
 bool pushButtonPressed(PushButton pushButton);
 
-AnalogSensor analogSensorInit(AnalogPort port, bool inverted);
+AnalogSensor analogSensorInit(SensorPort port, bool inverted);
 int analogSensorGet(AnalogSensor sensor);
 
-
-QuadEncoder quadEncoderInit(DigitalPort topPort, DigitalPort bottomPort, bool inverted);
+QuadEncoder quadEncoderInit(SensorPort topPort, SensorPort bottomPort,
+		bool inverted);
 int quadEncoderGet(QuadEncoder encoder);
 void quadEncoderReset(QuadEncoder encoder);
 int revolutionsToQuadEncoderCounts(float rotations);
@@ -136,8 +145,7 @@ int inchesToQuadEncoderCounts(float inches, int wheelDiameter);
 //wheelDiameter is in inches
 int feetToQuadEncoderCounts(float feet, int wheelDiameter);
 
-
-IntegratedEncoder integratedEncoderInit(IMEPort port, bool inverted);
+IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted);
 int integratedencoderGet(IntegratedEncoder encoder);
 void integratedEncoderReset(IntegratedEncoder encoder);
 int revolutionsToIntegratedEncoderCounts(float rotations);
@@ -146,10 +154,10 @@ int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter);
 //wheelDiameter is in inches
 int feetToIntegratedEncoderCounts(float feet, int wheelDiameter);
 
-
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 		bool inverted, int sensorConfig);
-//void sensorInit(Sensor sensor, bool inverted, int sensorConfig);
+Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder encoder);
+Sensor sensorInitFromQuadEncoder(QuadEncoder *encoder);
 int sensorGet(Sensor sensor);
 
 #endif /* SENSORS_H_ */

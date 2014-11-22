@@ -46,7 +46,13 @@ void initializeIO() {
 	setTeamName("934");
 
 	//set pin mode for jumper autonomus
-	pinMode(Digital_12, INPUT);
+//	pinMode(Digital_12, INPUT);
+//	pinMode(1, INPUT);
+	cortexPortsInit();
+
+	for(SensorPort i = Digital_1; i <= Analog_8; i++){
+		portSetPinMode(i, INPUT_FLOATING);
+	}
 }
 
 /*
@@ -63,7 +69,11 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	liftEncoder = quadEncoderInit(Digital_1, Digital_2, false);
+	lcdSetup(uart1);
+	speakerInit();
+	songsInit();
+//	QuadEncoder quad = quadEncoderInit(Digital_2, Digital_3, true);
+//	liftEncoder = sensorInitFromQuadEncoder(&quad);
 
 	//Drive Integrated Encoders
 	IntegratedEncoder frontLeftWheelEncoder = integratedEncoderInit(0, false);
@@ -78,13 +88,6 @@ void initialize() {
 	backRightWheel = createMotorWithIME(7, true, &backRightWheelEncoder);
 //
 //	//Init Lift Motors
-//	topLeftLift = createMotor(5, true);
-//	middleLeftLift = createMotor(4, false);
-//	bottomLeftLift = createMotor(3, true);
-//	topRightLift = createMotor(10, false);
-//	middleRightLift = createMotor(2, true);
-//	bottomRightLift = createMotor(1, false);
-
 	topLeftLift = createMotor(5, false);
 	middleLeftLift = createMotor(4, true);
 	bottomLeftLift = createMotor(3, false);
@@ -93,11 +96,15 @@ void initialize() {
 	bottomRightLift = createMotor(1, true);
 
 	//Init Controller Buttons
-	liftUp = createButton(5, JOY_UP);
-	liftDown = createButton(5, JOY_DOWN);
+//	liftUp = controlButtonInit(5, JOY_UP);
+//	liftDown = controlButtonInit(5, JOY_DOWN);
+//
+//	forward_backward_drive = controlStickInit(3);
+//	left_right_drive = controlStickInit(4);
+//	forward_backward_strafe = controlStickInit(2);
+//	left_right_strafe = controlStickInit(1);
 
-	forward_backward_drive = createAxis(3);
-	left_right_drive = createAxis(4);
-	forward_backward_strafe = createAxis(2);
-	left_right_strafe = createAxis(1);
+	//Init PID Controllers
+	liftPID =  pidControllerInit(1, 0, 0, setLiftPower, liftEncoder);
+	strafePID = pidControllerInit(1, 0, 0, strafeLeftRight, sensorInitFromIntegratedEncoder(frontLeftWheelEncoder));
 }

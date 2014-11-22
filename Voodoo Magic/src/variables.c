@@ -5,7 +5,11 @@
 /////////////
 
 //Lift liftEncoder
-QuadEncoder liftEncoder;
+Sensor liftEncoder;
+
+PIDController liftPID;
+PIDController strafePID;
+PIDController drivePID;
 
 //Init Drive Motors
 Motor frontLeftWheel;

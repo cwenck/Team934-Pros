@@ -22,7 +22,11 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.599893882" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.1759346474" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.2134707772" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder id="cdt.managedbuild.builder.gnu.cross.779610124" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder id="cdt.managedbuild.builder.gnu.cross.779610124" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
+								</outputEntries>
+							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1492636040" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1080172599" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -40,6 +44,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -90,4 +97,5 @@
 		<project id="Test.null.15856830" name="Test"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>
