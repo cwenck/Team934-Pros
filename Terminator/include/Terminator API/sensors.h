@@ -68,12 +68,12 @@ typedef enum {
 	IME_6 = 5,
 	IME_7 = 6,
 	IME_8 = 7
-} IMEPort;
+} IMEAddr;
 
 typedef union {
 	AnalogPort analogPort;
 	DigitalPort digitalPort;
-	IMEPort imePort;
+	IMEAddr imePort;
 } SensorPort;
 
 typedef struct {
@@ -95,6 +95,10 @@ typedef struct {
 	bool inverted;
 } AnalogSensor;
 
+//typedef struct {
+//	DigitalPort port;
+//} Jumper;
+
 typedef struct {
 	SensorType type;
 	SensorPort port_1;
@@ -115,11 +119,6 @@ typedef struct {
 	} sensorData;
 } Sensor;
 
-//vars
-extern Encoder liftEncoder;
-
-//functions
-
 //used for Bumpers and limit switches
 PushButton pushButtonInit(DigitalPort port);
 bool pushButtonPressed(PushButton pushButton);
@@ -127,13 +126,26 @@ bool pushButtonPressed(PushButton pushButton);
 AnalogSensor analogSensorInit(AnalogPort port, bool inverted);
 int analogSensorGet(AnalogSensor sensor);
 
+
 QuadEncoder quadEncoderInit(DigitalPort topPort, DigitalPort bottomPort, bool inverted);
 int quadEncoderGet(QuadEncoder encoder);
 void quadEncoderReset(QuadEncoder encoder);
+int revolutionsToQuadEncoderCounts(float rotations);
+//wheelDiameter is in inches
+int inchesToQuadEncoderCounts(float inches, int wheelDiameter);
+//wheelDiameter is in inches
+int feetToQuadEncoderCounts(float feet, int wheelDiameter);
 
-IntegratedEncoder integratedEncoderInit(IMEPort port, bool inverted);
+
+IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted);
 int integratedencoderGet(IntegratedEncoder encoder);
 void integratedEncoderReset(IntegratedEncoder encoder);
+int revolutionsToIntegratedEncoderCounts(float rotations);
+//wheelDiameter is in inches
+int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter);
+//wheelDiameter is in inches
+int feetToIntegratedEncoderCounts(float feet, int wheelDiameter);
+
 
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 		bool inverted, int sensorConfig);

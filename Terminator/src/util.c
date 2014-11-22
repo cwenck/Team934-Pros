@@ -21,3 +21,10 @@ float getMainBatteryPower() {
 void printMainBatteyPower() {
 	printf("Main Battery: %.2fV", getMainBatteryPower());
 }
+
+void executeAutonIfJumperInPort(DigitalPort port){
+	pinMode(port, INPUT);
+	if(!digitalRead(port)){
+		autonomous();
+	}
+}

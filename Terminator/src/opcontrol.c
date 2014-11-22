@@ -52,31 +52,15 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 
-void runMotor(int speed) {
-	motorSet(2, -speed);
-}
 
 void operatorControl() {
-//	encoderReset(liftEncoder);
-//	Sensor encoder = sensorInit(QuadratureEncoder, Digital_3, Digital_4, false, NULL);
-//	Sensor gyro = sensorInit(Gyroscope, Analog_1, NULL, false, NULL);
-//	Encoder encoder = encoderInit(3, 4, false);
-//	encoderReset(encoder);
-//	PIDController pid = pidControllerInit(2 , .1, .6, runMotor, encoder);
-//	pidControllerSetTarget(&pid, 500);
-//	pidSetIntegralRange(&pid, 100);
-//	pidStart(&pid);
-	while (1) {
-//		handleDriveInput();
-//		handleDriveOrStrafing();
-		handleLiftInput();
 
-//		int speed = readJoystick(forward_backward_drive);
-//		printf("%d\n\r", sensorGet(gyro));
-//		printf("%d\n\r", encoderGet(encoder));
-//		printf("%d\n\r", speed);
-//		setLiftPower()
-//		runMotor(speed);
+	executeAutonIfJumperInPort(12);
+
+	while (1) {
+
+		handleDriveOrStrafing();
+		handleLiftInput();
 
 		delay(20);
 	}

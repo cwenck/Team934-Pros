@@ -46,4 +46,19 @@ extern const short liftLowPower;
 void handleLiftInput();
 void setLiftPower(int speed);
 
+///////////////////////////////////
+//PID Controllable Drive Funtions//
+///////////////////////////////////
+
+//negative is backward, positive is forward
+void driveForwardBackward(int speed);
+
+//negative is left, positive is right
+//magnitude is motor power
+void turnLeftRight(int speed);
+
+//negative is left, positive is right
+//magnitude is motor power
+void strafeLeftRight(int speed);
+
 #endif /* ROBOT_CONTROL_H_ */

@@ -115,7 +115,7 @@ void initialize();
 void operatorControl();
 
 //#include "general_functions.h"
-#include "Terminator_API.h"
+#include "Terminator API/Terminator_API.h"
 
 // End C++ export structure
 #ifdef __cplusplus

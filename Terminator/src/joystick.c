@@ -4,7 +4,7 @@
 //Joystick//
 ////////////
 
-JoyInput createButton(unsigned char channel, unsigned char btn) {
+JoyInput controlButtonInit(unsigned char channel, unsigned char btn) {
 	JoyInput button;
 	button.channel = channel;
 	button.btn = btn;
@@ -12,7 +12,7 @@ JoyInput createButton(unsigned char channel, unsigned char btn) {
 	return button;
 }
 
-JoyInput createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn) {
+JoyInput controlButtonInitOnPartnerJoystick(unsigned char channel, unsigned char btn) {
 	JoyInput button;
 	button.channel = channel;
 	button.btn = btn;
@@ -20,7 +20,7 @@ JoyInput createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn)
 	return button;
 }
 
-JoyInput createAxis(unsigned char channel) {
+JoyInput controlStickInit(unsigned char channel) {
 	JoyInput button;
 	button.channel = channel;
 	button.btn = NULL;
@@ -28,7 +28,7 @@ JoyInput createAxis(unsigned char channel) {
 	return button;
 }
 
-JoyInput createAxisOnPartnerJoystick(unsigned char channel) {
+JoyInput constrolStickInitPartnerJoystick(unsigned char channel) {
 	JoyInput button;
 	button.channel = channel;
 	button.btn = NULL;

@@ -11,9 +11,10 @@
 #include "sensors.h"
 #include "motor.h"
 #include "joystick.h"
-#include "robot_control.h"
-#include "util.h"
 #include "pid.h"
+#include "util.h"
 #include "variables.h"
+#include "robot_control.h"
+#include "auton.h"
 
 #endif /* TERMINATOR_API_H_ */

@@ -60,27 +60,26 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	liftEncoder = encoderInit(1, 2, false);
 
 	//Init Drive Motors
-//	frontLeftWheel = createMotorWithIME(8, 0, true);
-//	frontRightWheel = createMotorWithIME(9, 1, true);
-//	backLeftWheel = createMotorWithIME(6, 2, false);
-//	backRightWheel = createMotorWithIME(7, 3, true);
+	frontLeftWheel = createMotor(5, false);
+	frontRightWheel = createMotor(6, true);
+	backLeftWheel = createMotor(7, false);
+	backRightWheel = createMotor(8, true);
 
 	//Init Lift Motors
-	frontLeftLift = createMotor(2, true);
-	backLeftLift = createMotor(3, true);
-	frontRightLift = createMotor(4, false);
-	backRightLift = createMotor(5, true);
+	frontLeftLift = createMotor(1, false);
+	backLeftLift = createMotor(3, false);
+	frontRightLift = createMotor(2, true);
+	backRightLift = createMotor(4, false);
 
 
 	//Init Controller Buttons
-	liftUp = createButton(5, JOY_UP);
-	liftDown = createButton(5, JOY_DOWN);
+	liftUp = controlButtonInit(5, JOY_UP);
+	liftDown = controlButtonInit(5, JOY_DOWN);
 
-	forward_backward_drive = createAxis(3);
-	left_right_drive = createAxis(4);
-	forward_backward_strafe = createAxis(2);
-	left_right_strafe = createAxis(1);
+	forward_backward_drive = controlStickInit(3);
+	left_right_drive = controlStickInit(4);
+	forward_backward_strafe = controlStickInit(2);
+	left_right_strafe = controlStickInit(1);
 }

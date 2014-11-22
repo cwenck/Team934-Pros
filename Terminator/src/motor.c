@@ -23,21 +23,21 @@ Motor createMotor(MotorPort port, bool reversed) {
 //encoders futher down the line get an address that is incremented down the line
 //so the next further one from the cortex would be 1 then 2 then 3 etc.
 Motor createMotorWithIME(MotorPort port, bool reversed,
-		IntegratedEncoder encoder) {
+		IntegratedEncoder *encoder) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder_data.ime = encoder;
+	motor.encoder_data.ime = *encoder;
 	motor.encoderType = QuadratureEncoder;
 	return motor;
 }
 
 Motor createMotorWithEncoder(MotorPort port, bool reversed,
-		QuadEncoder encoder) {
+		QuadEncoder *encoder) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder_data.quadEncoder = encoder;
+	motor.encoder_data.quadEncoder = *encoder;
 	motor.encoderType = QuadratureEncoder;
 	return motor;
 }

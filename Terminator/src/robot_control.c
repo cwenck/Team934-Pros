@@ -9,7 +9,6 @@ void handleAllInput() {
 ////////////////////////////
 ////////////////////////////
 
-
 ////////
 //Lift//
 ////////
@@ -19,8 +18,8 @@ const short liftLowPower = 80;
 
 void setLiftPower(int speed) {
 	setMotorPower(frontLeftLift, speed);
-	setMotorPower(backLeftLift, speed);
 	setMotorPower(frontRightLift, speed);
+	setMotorPower(backLeftLift, speed);
 	setMotorPower(backRightLift, speed);
 }
 
@@ -155,8 +154,36 @@ void handleStrafingInput() {
 void handleDriveOrStrafing() {
 	if (abs(readJoystick(forward_backward_drive)) <= DRIVE_THRESHOLD
 			&& abs(readJoystick(left_right_drive)) <= DRIVE_THRESHOLD) {
-		handleDriveInput();
-	} else {
 		handleStrafingInput();
+	} else {
+		handleDriveInput();
+	}
+}
+
+///////////////////////////////////
+//PID Controllable Drive Funtions//
+///////////////////////////////////
+
+void driveForwardBackward(int speed) {
+	if (speed >= 0) {
+		drive(speed, forward);
+	} else {
+		drive(speed, backward);
+	}
+}
+
+void turnLeftRight(int speed) {
+	if (speed >= 0) {
+		drive(speed, right);
+	} else {
+		drive(speed, left);
+	}
+}
+
+void strafeLeftRight(int speed) {
+	if (speed >= 0) {
+		strafe(speed, right);
+	} else {
+		strafe(speed, left);
 	}
 }

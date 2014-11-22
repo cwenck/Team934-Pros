@@ -17,21 +17,14 @@ typedef struct {
 } JoyInput;
 
 //vars
-extern JoyInput liftUp;
-extern JoyInput liftDown;
-
-extern JoyInput forward_backward_drive;
-extern JoyInput left_right_drive;
-extern JoyInput forward_backward_strafe;
-extern JoyInput left_right_strafe;
 
 //functions
 int readJoystick(JoyInput button);
 unsigned char getNumConnectedJoysticks();
 
-JoyInput createButton(unsigned char channel, unsigned char btn);
-JoyInput createButtonOnPartnerJoystick(unsigned char channel, unsigned char btn);
-JoyInput createAxis(unsigned char channel);
-JoyInput createAxisOnPartnerJoystick(unsigned char channel);
+JoyInput controlButtonInit(unsigned char channel, unsigned char btn);
+JoyInput controlButtonInitOnPartnerJoystick(unsigned char channel, unsigned char btn);
+JoyInput controlStickInit(unsigned char channel);
+JoyInput constrolStickInitPartnerJoystick(unsigned char channel);
 
 #endif /* JOYSTICK_H_ */
