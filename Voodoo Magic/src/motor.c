@@ -60,7 +60,7 @@ int motorEncoderGet(Motor motor) {
 	int value = NULL;
 	switch (motor.encoderType) {
 	case IntegratedMotorEncoder:
-		value = integratedencoderGet(motor.encoder_data.ime);
+		value = integratedEncoderGet(motor.encoder_data.ime);
 		break;
 	case QuadratureEncoder:
 		value = quadEncoderGet(motor.encoder_data.quadEncoder);

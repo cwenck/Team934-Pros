@@ -75,7 +75,6 @@ void songsInitTitles() {
 			title_pos++;
 		}
 		titles[i] = title;
-		printf("%s\n\r", titles[i]);
 	}
 }
 

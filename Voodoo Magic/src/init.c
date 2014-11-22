@@ -104,7 +104,4 @@ void initialize() {
 //	forward_backward_strafe = controlStickInit(2);
 //	left_right_strafe = controlStickInit(1);
 
-	//Init PID Controllers
-	liftPID =  pidControllerInit(1, 0, 0, setLiftPower, liftEncoder);
-	strafePID = pidControllerInit(1, 0, 0, strafeLeftRight, sensorInitFromIntegratedEncoder(frontLeftWheelEncoder));
 }

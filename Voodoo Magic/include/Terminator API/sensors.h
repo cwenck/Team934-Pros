@@ -87,11 +87,11 @@ typedef struct QuadEncoder{
 
 typedef struct PushButton{
 	SensorPort port;
+	bool inverted;
 } PushButton;
 
 typedef struct AnalogSensor{
 	SensorPort port;
-	bool inverted;
 } AnalogSensor;
 
 //typedef struct {
@@ -108,7 +108,7 @@ typedef struct Sensor{
 	//This should be NULL if it is not one of those two sensor types.
 	SensorPort port_2;
 	IMEAddr imeAddr;
-
+	bool isAnalog;
 	bool inverted;
 	union {
 		IntegratedEncoder ime;
@@ -116,7 +116,6 @@ typedef struct Sensor{
 		PushButton pushButton;
 		Ultrasonic sonar;
 		AnalogSensor analog;
-		Gyro gyro;
 	} sensorData;
 } Sensor;
 
@@ -129,10 +128,10 @@ int portRead(SensorPort port);
 void portWrite(SensorPort port, bool value);
 
 //used for Bumpers and limit switches
-PushButton pushButtonInit(SensorPort port);
+PushButton pushButtonInit(SensorPort port, bool inverted);
 bool pushButtonPressed(PushButton pushButton);
 
-AnalogSensor analogSensorInit(SensorPort port, bool inverted);
+AnalogSensor analogSensorInit(SensorPort port);
 int analogSensorGet(AnalogSensor sensor);
 
 QuadEncoder quadEncoderInit(SensorPort topPort, SensorPort bottomPort,
@@ -146,7 +145,7 @@ int inchesToQuadEncoderCounts(float inches, int wheelDiameter);
 int feetToQuadEncoderCounts(float feet, int wheelDiameter);
 
 IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted);
-int integratedencoderGet(IntegratedEncoder encoder);
+int integratedEncoderGet(IntegratedEncoder encoder);
 void integratedEncoderReset(IntegratedEncoder encoder);
 int revolutionsToIntegratedEncoderCounts(float rotations);
 //wheelDiameter is in inches
@@ -155,8 +154,8 @@ int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter);
 int feetToIntegratedEncoderCounts(float feet, int wheelDiameter);
 
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
-		bool inverted, int sensorConfig);
-Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder encoder);
+		bool inverted);
+Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder *encoder);
 Sensor sensorInitFromQuadEncoder(QuadEncoder *encoder);
 int sensorGet(Sensor sensor);
 
