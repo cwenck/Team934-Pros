@@ -7,6 +7,9 @@
 //Lift liftEncoder
 Sensor liftEncoder;
 
+Sensor backLeftEncoder;
+Sensor backRightEncoder;
+
 PIDController liftPID;
 PIDController strafePID;
 PIDController drivePID;

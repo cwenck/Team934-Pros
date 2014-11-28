@@ -164,29 +164,41 @@ void quadEncoderReset(QuadEncoder encoder) {
 
 //360 counts per revolution
 int revolutionsToQuadEncoderCounts(float rotations) {
-	const float countsPerRotation = 360.f;
+	float countsPerRotation = 360.f;
 	return (int) (rotations * countsPerRotation);
 }
 
 //wheel diameter is in inches
 int inchesToQuadEncoderCounts(float inches, int wheelDiameter) {
-	const float countsPerRotation = 360.f;
+	float countsPerRotation = 360.f;
 	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
 
 int feetToQuadEncoderCounts(float feet, int wheelDiameter) {
-	const int countsPerRotation = 360;
+	float countsPerRotation = 360.f;
 	float inches = feet * 12.f;
 	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
 
-IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted) {
+void integratedEncoderPrimaryInitialization() {
+	connectedIntegratedMotorEncoders = imeInitializeAll();
+}
+
+void integratedEncoderResetAll() {
+	for (int i = 0; i < connectedIntegratedMotorEncoders; i++) {
+		imeReset(i);
+	}
+}
+
+IntegratedEncoder integratedEncoderInit(IMEAddr port, MotorType type,
+		bool inverted) {
 	IntegratedEncoder ime;
 	ime.imeAddress = port;
+	ime.motorType = type;
 	ime.inverted = inverted;
 	return ime;
 }
@@ -204,21 +216,37 @@ void integratedEncoderReset(IntegratedEncoder encoder) {
 }
 
 //360 counts per revolution
-int revolutionsToIntegratedEncoderCounts(float rotations) {
-	const int countsPerRotation = 360.f;
+int revolutionsToIntegratedEncoderCounts(MotorType type, float rotations) {
+	float countsPerRotation = 0;
+	if (type == high_torque) {
+		countsPerRotation = 627.2f;
+	} else if (type == high_speed) {
+		countsPerRotation = 392.f;
+	}
 	return (int) (rotations * countsPerRotation);
 }
 
 //wheel diameter is in inches
-int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter) {
-	const int countsPerRotation = 360;
+int inchesToIntegratedEncoderCounts(MotorType type, float inches,
+		int wheelDiameter) {
+	float countsPerRotation = 0;
+	if (type == high_torque) {
+		countsPerRotation = 627.2f;
+	} else if (type == high_speed) {
+		countsPerRotation = 392.f;
+	}
 	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
 
-int feetToIntegratedEncoderCounts(float feet, int wheelDiameter) {
-	const int countsPerRotation = 360;
+int feetToIntegratedEncoderCounts(MotorType type, float feet, int wheelDiameter) {
+	float countsPerRotation = 0;
+	if (type == high_torque) {
+		countsPerRotation = 627.2f;
+	} else if (type == high_speed) {
+		countsPerRotation = 392.f;
+	}
 	float inches = feet * 12.f;
 	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
@@ -234,7 +262,7 @@ Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 	Sensor *empty = NULL;
 	sensor.type = type;
 	if (sensor.port_1 >= Analog_1 && sensor.port_1 <= Analog_8
-			&& (type != Bumper && type != Limit_Switch)) {
+			&& (type != Sensor_Bumper && type != Sensor_LimitSwitch)) {
 		sensor.isAnalog = true;
 	} else {
 		sensor.isAnalog = false;
@@ -247,32 +275,32 @@ Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 	}
 
 	switch (sensor.type) {
-	case QuadratureEncoder:
+	case Sensor_QuadEncoder:
 		sensor.sensorData.quadEncoder = quadEncoderInit(sensor.port_1,
 				sensor.port_2, inverted);
 		break;
-	case Sonar:
+	case Sensor_Sonar:
 		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1, sensor.port_2);
 		break;
-	case Line:
+	case Sensor_Line:
 		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
-	case Light:
+	case Sensor_Light:
 		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
-	case Bumper:
+	case Sensor_Bumper:
 		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1, inverted);
 		break;
-	case Limit_Switch:
+	case Sensor_LimitSwitch:
 		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1, inverted);
 		break;
-	case Potentiometer:
+	case Sensor_Potentiometer:
 		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
-	case Gyroscope:
+	case Sensor_Gyroscope:
 		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
-	case Accelerometer:
+	case Sensor_Accelerometer:
 		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
 	default:
@@ -282,19 +310,11 @@ Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 	return sensor;
 }
 
-Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder *encoder) {
+Sensor sensorInitIntegratedEncoder(IMEAddr addr, MotorType type, bool inverted) {
 	Sensor sensor;
-	sensor.type = IntegratedMotorEncoder;
-	sensor.sensorData.ime = *encoder;
-	sensor.inverted = false;
-	return sensor;
-}
-
-Sensor sensorInitFromQuadEncoder(QuadEncoder *encoder) {
-	Sensor sensor;
-	sensor.type = QuadratureEncoder;
-	sensor.sensorData.quadEncoder = *encoder;
-	sensor.inverted = false;
+	sensor.type = Sensor_IntegratedEncoder;
+	sensor.sensorData.ime = integratedEncoderInit(addr, type, inverted);
+	sensor.inverted = inverted;
 	return sensor;
 }
 
@@ -303,36 +323,49 @@ int sensorGet(Sensor sensor) {
 	int value = NULL;
 
 	switch (sensor.type) {
-	case IntegratedMotorEncoder:
+	case Sensor_IntegratedEncoder:
 		value = integratedEncoderGet(sensor.sensorData.ime);
 		break;
-	case QuadratureEncoder:
+	case Sensor_QuadEncoder:
 		value = quadEncoderGet(sensor.sensorData.quadEncoder);
 		break;
-	case Sonar:
+	case Sensor_Sonar:
 		value = ultrasonicGet(sensor.sensorData.sonar);
 		break;
-	case Line:
+	case Sensor_Line:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
-	case Light:
+	case Sensor_Light:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
-	case Bumper:
+	case Sensor_Bumper:
 		value = pushButtonPressed(sensor.sensorData.pushButton);
 		break;
-	case Limit_Switch:
+	case Sensor_LimitSwitch:
 		value = pushButtonPressed(sensor.sensorData.pushButton);
 		break;
-	case Potentiometer:
+	case Sensor_Potentiometer:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
-	case Gyroscope:
+	case Sensor_Gyroscope:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
-	case Accelerometer:
+	case Sensor_Accelerometer:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	}
 	return value;
+}
+
+void sensorReset(Sensor sensor){
+	switch(sensor.type){
+	case Sensor_QuadEncoder:
+		quadEncoderReset(sensor.sensorData.quadEncoder);
+		break;
+	case Sensor_IntegratedEncoder:
+		integratedEncoderReset(sensor.sensorData.ime);
+		break;
+	default:
+		break;
+	}
 }

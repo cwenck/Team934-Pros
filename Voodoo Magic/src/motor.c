@@ -4,14 +4,16 @@
 //Motors//
 //////////
 
-void setMotorPower(Motor motor, int speed) {
+unsigned char connectedIntegratedMotorEncoders;
+
+void motorPowerSet(Motor motor, int speed) {
 	if (motor.reversed) {
 		speed = -speed;
 	}
 	motorSet(motor.port, speed);
 }
 
-Motor createMotor(MotorPort port, bool reversed) {
+Motor motorCreate(MotorPort port, bool reversed) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
@@ -22,48 +24,34 @@ Motor createMotor(MotorPort port, bool reversed) {
 //Integrated motor encoders closest to the cortex in the chain get assigned an address of 0
 //encoders futher down the line get an address that is incremented down the line
 //so the next further one from the cortex would be 1 then 2 then 3 etc.
-Motor createMotorWithIME(MotorPort port, bool reversed,
-		IntegratedEncoder *encoder) {
+Motor motorCreateWithEncoder(MotorPort port, bool reversed, Sensor *encoder) {
 	Motor motor;
 	motor.port = port;
 	motor.reversed = reversed;
-	motor.encoder_data.ime = *encoder;
-	motor.encoderType = QuadratureEncoder;
-	return motor;
-}
-
-Motor createMotorWithEncoder(MotorPort port, bool reversed,
-		QuadEncoder *encoder) {
-	Motor motor;
-	motor.port = port;
-	motor.reversed = reversed;
-	motor.encoder_data.quadEncoder = *encoder;
-	motor.encoderType = QuadratureEncoder;
-	return motor;
-}
-
-void resetMotorEncoder(Motor motor) {
-	switch (motor.encoderType) {
-	case IntegratedMotorEncoder:
-		integratedEncoderReset(motor.encoder_data.ime);
+	switch (encoder->type) {
+	case Sensor_IntegratedEncoder:
+		motor.encoderType = Sensor_IntegratedEncoder;
 		break;
-	case QuadratureEncoder:
-		quadEncoderReset(motor.encoder_data.quadEncoder);
+	case Sensor_QuadEncoder:
+		motor.encoderType = Sensor_QuadEncoder;
 		break;
 	default:
-		print("Invalid Encoder Type!\n\r");
+		//invalid sensor
+		print("Invalid encoder for use with a motor.\n\r");
 		break;
 	}
+	motor.encoder_data = *encoder;
+	return motor;
 }
 
 int motorEncoderGet(Motor motor) {
 	int value = NULL;
 	switch (motor.encoderType) {
-	case IntegratedMotorEncoder:
-		value = integratedEncoderGet(motor.encoder_data.ime);
+	case Sensor_IntegratedEncoder:
+		value = sensorGet(motor.encoder_data);
 		break;
-	case QuadratureEncoder:
-		value = quadEncoderGet(motor.encoder_data.quadEncoder);
+	case Sensor_QuadEncoder:
+		value = sensorGet(motor.encoder_data);
 		break;
 	default:
 		print("Invalid Encoder Type!\n\r");
@@ -72,10 +60,10 @@ int motorEncoderGet(Motor motor) {
 	return value;
 }
 
-QuadEncoder* motorQuadEncoderGetPointer(Motor *motor) {
+Sensor* motorEncoderGetPointer(Motor *motor) {
 	switch (motor->encoderType) {
-	case QuadratureEncoder:
-		return &(motor->encoder_data.quadEncoder);
+	case Sensor_QuadEncoder:
+		return &(motor->encoder_data);
 		break;
 	default:
 		print("Invalid Encoder Type!\n\r");
@@ -84,18 +72,3 @@ QuadEncoder* motorQuadEncoderGetPointer(Motor *motor) {
 	}
 	return NULL;
 }
-
-IntegratedEncoder* motorIntegratedEncoderGetPointer(Motor *motor) {
-	switch (motor->encoderType) {
-	case IntegratedMotorEncoder:
-		return &(motor->encoder_data.ime);
-		break;
-	default:
-		print("Invalid Encoder Type!\n\r");
-		return NULL;
-		break;
-	}
-	return NULL;
-}
-
-//DRIVE_THRESHOLD

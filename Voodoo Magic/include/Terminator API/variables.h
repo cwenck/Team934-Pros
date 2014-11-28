@@ -4,6 +4,9 @@
 //Sensors
 extern Sensor liftEncoder;
 
+extern Sensor backLeftEncoder;
+extern Sensor backRightEncoder;
+
 extern PIDController liftPID;
 extern PIDController strafePID;
 extern PIDController drivePID;

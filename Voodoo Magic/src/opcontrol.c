@@ -53,10 +53,26 @@
  */
 void operatorControl() {
 //	executeAutonIfJumperInPort(Digital_12);
-	int value;
+//	int value;
+	integratedEncoderResetAll();
+	sensorReset(liftEncoder);
+
+
+	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
+//	pidControllerSetTarget(&liftPID, 7000);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
+//	pidStart(&liftPID);
+	delay(5000);
+//	pidControllerSetTarget(&liftPID, 0);
+//	pidStart(&liftPID);
 	while (1) {
-		lcdDisplayBatteryStatus(uart1 );
+		lcdDisplayFormattedCenteredString(uart1, 1, "Lift: %d", sensorGet(liftEncoder));
+		if(readJoystick(Btn8U) == 1){
+			sensorReset(liftEncoder);
+		}
+		//		lcdDisplayBatteryStatus(uart1 );
 //		FILE *auton_file = fopen("AUTON", "w");//		*auton_file
+		printf("Lift: %d\n\r", sensorGet(liftEncoder));
 		handleDriveOrStrafing();
 		handleLiftInput();
 		delay(50);

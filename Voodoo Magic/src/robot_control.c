@@ -17,12 +17,12 @@ const short liftHighPower = 127;
 const short liftLowPower = 80;
 
 void setLiftPower(int speed) {
-	setMotorPower(topLeftLift, speed);
-	setMotorPower(middleLeftLift, speed);
-	setMotorPower(bottomLeftLift, speed);
-	setMotorPower(topRightLift, speed);
-	setMotorPower(middleRightLift, speed);
-	setMotorPower(bottomRightLift, speed);
+	motorPowerSet(topLeftLift, speed);
+	motorPowerSet(middleLeftLift, speed);
+	motorPowerSet(bottomLeftLift, speed);
+	motorPowerSet(topRightLift, speed);
+	motorPowerSet(middleRightLift, speed);
+	motorPowerSet(bottomRightLift, speed);
 }
 
 void handleLiftInput() {
@@ -47,16 +47,16 @@ const int DRIVE_THRESHOLD = 5;
  */
 void setRightMotorSpeed(int speed, WheelDirection dir) {
 	if (dir == same) {
-		setMotorPower(frontRightWheel, speed);
-		setMotorPower(backRightWheel, speed);
+		motorPowerSet(frontRightWheel, speed);
+		motorPowerSet(backRightWheel, speed);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		setMotorPower(frontRightWheel, -speed);
-		setMotorPower(backRightWheel, speed);
+		motorPowerSet(frontRightWheel, -speed);
+		motorPowerSet(backRightWheel, speed);
 	} else if (dir == away) {
 		speed = abs(speed);
-		setMotorPower(frontRightWheel, speed);
-		setMotorPower(backRightWheel, -speed);
+		motorPowerSet(frontRightWheel, speed);
+		motorPowerSet(backRightWheel, -speed);
 	}
 }
 
@@ -66,16 +66,16 @@ void setRightMotorSpeed(int speed, WheelDirection dir) {
  */
 void setLeftMotorSpeed(int speed, WheelDirection dir) {
 	if (dir == same) {
-		setMotorPower(frontLeftWheel, speed);
-		setMotorPower(backLeftWheel, speed);
+		motorPowerSet(frontLeftWheel, speed);
+		motorPowerSet(backLeftWheel, speed);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		setMotorPower(frontLeftWheel, -speed);
-		setMotorPower(backLeftWheel, speed);
+		motorPowerSet(frontLeftWheel, -speed);
+		motorPowerSet(backLeftWheel, speed);
 	} else if (dir == away) {
 		speed = abs(speed);
-		setMotorPower(frontLeftWheel, speed);
-		setMotorPower(backLeftWheel, -speed);
+		motorPowerSet(frontLeftWheel, speed);
+		motorPowerSet(backLeftWheel, -speed);
 	}
 }
 
@@ -160,6 +160,43 @@ void handleDriveOrStrafing() {
 	} else {
 		handleDriveInput();
 	}
+}
+
+//Lift Distance to encoder Ticks
+float liftEncoderTicksPerInch = 88;
+float ticksTillIntakeUncompressed = 220;
+float maxLiftEncoderTicks = 3700;
+int inchesToLiftEncoderTicks(float inches) {
+	int value = sensorGet(liftEncoder);
+	int ticks = 0;
+
+	if (value > ticksTillIntakeUncompressed) {
+		ticks = ticksTillIntakeUncompressed + (int) (inches * liftEncoderTicksPerInch);
+	} else {
+		ticks = ticksTillIntakeUncompressed + (int) (inches * liftEncoderTicksPerInch);
+	}
+
+	if(ticks > maxLiftEncoderTicks){
+		ticks = maxLiftEncoderTicks;
+	}
+
+	return ticks;
+}
+int feetToLiftEncoderTicks(float feet) {
+	int value = sensorGet(liftEncoder);
+	int ticks = 0;
+	
+	if (value > ticksTillIntakeUncompressed) {
+		ticks =  ticksTillIntakeUncompressed + (int) (feet * liftEncoderTicksPerInch * 12);
+	} else {
+		ticks =  ticksTillIntakeUncompressed + (int) (feet * liftEncoderTicksPerInch * 12);
+	}
+
+	if(ticks > maxLiftEncoderTicks){
+		ticks = maxLiftEncoderTicks;
+	}
+
+	return ticks;
 }
 
 ///////////////////////////////////

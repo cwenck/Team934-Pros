@@ -46,6 +46,9 @@ extern const short liftLowPower;
 void handleLiftInput();
 void setLiftPower(int speed);
 
+int inchesToLiftEncoderTicks(float inches);
+int feetToLiftEncoderTicks(float feet);
+
 ///////////////////////////////////
 //PID Controllable Drive Funtions//
 ///////////////////////////////////

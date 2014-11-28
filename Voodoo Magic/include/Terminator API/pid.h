@@ -47,6 +47,7 @@ typedef struct {
 PIDController pidControllerInit(float kp, float ki, float kd,
 		void (*setMotorSpeedFunction)(int), Sensor sensor);
 void pidControllerSetTarget(PIDController *controller, float target);
+void pidControllerSetTolerance(PIDController *controller, float tolerance);
 void pidSetIntegralRange(PIDController *controller, float integralRange);
 void pidControllerSetIntegralSpeedBounds(PIDController *controller,
 		float integral_min, float integral_max);

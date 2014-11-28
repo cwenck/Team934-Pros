@@ -6,21 +6,22 @@
 ///////////
 
 #include "main.h"
+#include "motor.h"
 
-typedef enum SensorType{
-	IntegratedMotorEncoder,	//IC2
-	QuadratureEncoder,		//Digital
-	Sonar,					//Digital
-	Line,					//Analog
-	Light,					//Analog
-	Bumper,					//Digital
-	Limit_Switch,			//Digital
-	Potentiometer,			//Analog
-	Gyroscope,				//Analog
-	Accelerometer			//Analog
-} SensorType;
+enum _SensorType{
+	Sensor_IntegratedEncoder,	//IC2
+	Sensor_QuadEncoder,			//Digital
+	Sensor_Sonar,				//Digital
+	Sensor_Line,				//Analog
+	Sensor_Light,				//Analog
+	Sensor_Bumper,				//Digital
+	Sensor_LimitSwitch,			//Digital
+	Sensor_Potentiometer,		//Analog
+	Sensor_Gyroscope,			//Analog
+	Sensor_Accelerometer		//Analog
+};
 
-typedef enum MotorPort{
+enum _MotorPort{
 	Motor_1 = 1,
 	Motor_2 = 2,
 	Motor_3 = 3,
@@ -31,9 +32,9 @@ typedef enum MotorPort{
 	Motor_8 = 8,
 	Motor_9 = 9,
 	Motor_10 = 10
-} MotorPort;
+};
 
-typedef enum IMEAddr{
+enum _IMEAddr{
 	IME_1 = 0,
 	IME_2 = 1,
 	IME_3 = 2,
@@ -42,9 +43,9 @@ typedef enum IMEAddr{
 	IME_6 = 5,
 	IME_7 = 6,
 	IME_8 = 7
-} IMEAddr;
+};
 
-typedef enum SensorPort{
+enum _SensorPort{
 	Digital_1 = 1,
 	Digital_2 = 2,
 	Digital_3 = 3,
@@ -65,40 +66,45 @@ typedef enum SensorPort{
 	Analog_6 = 18,
 	Analog_7 = 19,
 	Analog_8 = 20
-} SensorPort;
+};
 
-typedef struct CortexPort{
+struct _CortexPort{
 	SensorPort port;
 	unsigned char mode;
 	bool analogCapabilites;
-} CortexPort;
+};
 
-typedef struct IntegratedEncoder{
+enum _MotorType {
+	high_speed, high_torque
+};
+
+struct _IntegratedEncoder{
 	IMEAddr imeAddress;
+	MotorType motorType;
 	bool inverted;
-} IntegratedEncoder;
+};
 
-typedef struct QuadEncoder{
+struct _QuadEncoder{
 	SensorPort top;
 	SensorPort bottom;
 	Encoder encoder_data;
 	bool inverted;
-} QuadEncoder;
+};
 
-typedef struct PushButton{
+struct _PushButton{
 	SensorPort port;
 	bool inverted;
-} PushButton;
+};
 
-typedef struct AnalogSensor{
+struct _AnalogSensor{
 	SensorPort port;
-} AnalogSensor;
+};
 
 //typedef struct {
 //	DigitalPort port;
 //} Jumper;
 
-typedef struct Sensor{
+struct _Sensor{
 	SensorType type;
 
 	SensorPort port_1;
@@ -117,7 +123,7 @@ typedef struct Sensor{
 		Ultrasonic sonar;
 		AnalogSensor analog;
 	} sensorData;
-} Sensor;
+};
 
 void cortexPortsInit();
 CortexPort* cortexPortForSensorPort(SensorPort port);
@@ -144,19 +150,21 @@ int inchesToQuadEncoderCounts(float inches, int wheelDiameter);
 //wheelDiameter is in inches
 int feetToQuadEncoderCounts(float feet, int wheelDiameter);
 
-IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted);
+void integratedEncoderPrimaryInitialization();
+void integratedEncoderResetAll();
+IntegratedEncoder integratedEncoderInit(IMEAddr port, MotorType motorType, bool inverted);
 int integratedEncoderGet(IntegratedEncoder encoder);
 void integratedEncoderReset(IntegratedEncoder encoder);
-int revolutionsToIntegratedEncoderCounts(float rotations);
+int revolutionsToIntegratedEncoderCounts(MotorType type, float rotations);
 //wheelDiameter is in inches
-int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter);
+int inchesToIntegratedEncoderCounts(MotorType type, float inches, int wheelDiameter);
 //wheelDiameter is in inches
-int feetToIntegratedEncoderCounts(float feet, int wheelDiameter);
+int feetToIntegratedEncoderCounts(MotorType type, float feet, int wheelDiameter);
 
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
 		bool inverted);
-Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder *encoder);
-Sensor sensorInitFromQuadEncoder(QuadEncoder *encoder);
+Sensor sensorInitIntegratedEncoder(IMEAddr addr, MotorType type, bool inverted);
 int sensorGet(Sensor sensor);
+void sensorReset(Sensor sensor);
 
 #endif /* SENSORS_H_ */

@@ -9,7 +9,7 @@
 
 extern unsigned char connectedJoysticks;
 
-typedef enum {
+enum _JoyInput{
 	Btn5U,
 	Btn6U,
 	Btn7U,
@@ -42,7 +42,7 @@ typedef enum {
 	Partner_Ch2,
 	Partner_Ch3,
 	Partner_Ch4
-} JoyInput;
+};
 
 //vars
 

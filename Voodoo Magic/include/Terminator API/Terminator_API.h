@@ -18,8 +18,10 @@
 
 #include "stdio_print_header.h"
 
-#include "sensors.h"
+#include "typedefs.h"
+
 #include "motor.h"
+#include "sensors.h"
 #include "joystick.h"
 #include "lcd.h"
 #include "pid.h"

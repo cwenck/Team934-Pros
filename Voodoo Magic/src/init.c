@@ -50,7 +50,7 @@ void initializeIO() {
 //	pinMode(1, INPUT);
 	cortexPortsInit();
 
-	for(SensorPort i = Digital_1; i <= Analog_8; i++){
+	for (SensorPort i = Digital_1; i <= Analog_8; i++) {
 		portSetPinMode(i, INPUT_FLOATING);
 	}
 }
@@ -69,39 +69,40 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	lcdSetup(uart1);
+	integratedEncoderPrimaryInitialization();
+	lcdSetup(uart1 );
 	speakerInit();
 	songsInit();
-//	QuadEncoder quad = quadEncoderInit(Digital_2, Digital_3, true);
-//	liftEncoder = sensorInitFromQuadEncoder(&quad);
+	liftEncoder = sensorInit(Sensor_QuadEncoder, Digital_1, Digital_2, true);
 
-	//Drive Integrated Encoders
-	IntegratedEncoder frontLeftWheelEncoder = integratedEncoderInit(0, false);
-	IntegratedEncoder frontRightWheelEncoder = integratedEncoderInit(1, false);
-	IntegratedEncoder backLeftWheelEncoder = integratedEncoderInit(2, false);
-	IntegratedEncoder backRightWheelEncoder = integratedEncoderInit(3, false);
+//Drive Integrated Encoders
+	backLeftEncoder = sensorInitIntegratedEncoder(IME_2, high_torque, false);
+	backRightEncoder = sensorInitIntegratedEncoder(IME_1, high_torque, false);
 
-	//Init Drive Motors
-	frontLeftWheel = createMotorWithIME(8, false, &frontLeftWheelEncoder);
-	frontRightWheel = createMotorWithIME(9, false, &frontRightWheelEncoder);
-	backLeftWheel = createMotorWithIME(6, false, &backLeftWheelEncoder);
-	backRightWheel = createMotorWithIME(7, true, &backRightWheelEncoder);
-//
+//Init Drive Motors
+	frontLeftWheel = motorCreate(8, false);
+	frontRightWheel = motorCreate(9, false);
+	backLeftWheel = motorCreateWithEncoder(6, false, &backLeftEncoder);
+	backRightWheel = motorCreateWithEncoder(7, true, &backRightEncoder);
+
 //	//Init Lift Motors
-	topLeftLift = createMotor(5, false);
-	middleLeftLift = createMotor(4, true);
-	bottomLeftLift = createMotor(3, false);
-	topRightLift = createMotor(10, true);
-	middleRightLift = createMotor(2, false);
-	bottomRightLift = createMotor(1, true);
+	topLeftLift = motorCreate(5, false);
+	middleLeftLift = motorCreate(4, true);
+	bottomLeftLift = motorCreate(3, false);
+	topRightLift = motorCreate(10, true);
+	middleRightLift = motorCreate(2, false);
+	bottomRightLift = motorCreate(1, true);
 
 	//Init Controller Buttons
-//	liftUp = controlButtonInit(5, JOY_UP);
-//	liftDown = controlButtonInit(5, JOY_DOWN);
-//
-//	forward_backward_drive = controlStickInit(3);
-//	left_right_drive = controlStickInit(4);
-//	forward_backward_strafe = controlStickInit(2);
-//	left_right_strafe = controlStickInit(1);
+	liftUp = Btn5U;
+	liftDown = Btn5D;
 
+	forward_backward_drive = Ch3;
+	left_right_drive = Ch4;
+	forward_backward_strafe = Ch2;
+	left_right_strafe = Ch1;
+
+	//pid controllers
+	liftPID = pidControllerInit(2, 0, 3, setLiftPower, liftEncoder);
+	pidControllerSetTolerance(&liftPID, 20);
 }

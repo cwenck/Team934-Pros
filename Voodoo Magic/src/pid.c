@@ -18,6 +18,10 @@ PIDController pidControllerInit(float kp, float ki, float kd,
 	return pid;
 }
 
+void pidControllerSetTolerance(PIDController *controller, float tolerance){
+	controller->error_tolerance = tolerance;
+}
+
 void pidControllerSetTarget(PIDController *controller, float target) {
 	controller->sensor_target = target;
 }
@@ -50,7 +54,7 @@ void pidTask(void *controller) {
 		pid.sensor_reading = sensorGet(pid.sensor);
 		pid.error = pid.sensor_target - pid.sensor_reading;
 
-		printf("Err: %d\n\r", pid.error);
+		lcdDisplayFormattedCenteredString(uart1, 1, "Err: %.2f\n\r", pid.error);
 
 		if (abs(pid.error) < pid.integral_range) {
 			pid.integral += pid.error;
@@ -94,4 +98,5 @@ void pidTask(void *controller) {
 		pid.setMotorSpeedFunction(pid.motor_speed);
 		delay(20);
 	}
+	pid.setMotorSpeedFunction(0);
 }
