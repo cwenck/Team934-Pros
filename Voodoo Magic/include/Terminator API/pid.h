@@ -27,6 +27,7 @@ struct _PIDController{
 	//see if the target has been reached
 	int num_checks_passed;
 	bool target_reached;
+	bool shouldTerminate;
 	float error_tolerance;
 	float error;
 	float last_error;
@@ -47,10 +48,11 @@ struct _PIDController{
 };
 
 PIDController pidControllerInit(float kp, float ki, float kd,
-		void (*setMotorSpeedFunction)(int), Sensor sensor);
+		void (*setMotorSpeedFunction)(int, AccessID), Sensor sensor);
 void pidControllerSetTarget(PIDController *controller, float target);
 void pidControllerSetTolerance(PIDController *controller, float tolerance);
 void pidSetIntegralRange(PIDController *controller, float integralRange);
+//set the minimum and maximum absolute values of the inegral component of the motor speed
 void pidControllerSetIntegralSpeedBounds(PIDController *controller,
 		float integral_min, float integral_max);
 void pidStart(PIDController *controller);

@@ -5,7 +5,7 @@
 ///////
 
 PIDController pidControllerInit(float kp, float ki, float kd,
-		void (*setMotorSpeedFunction)(int), Sensor sensor) {
+		void (*setMotorSpeedFunction)(int, AccessID), Sensor sensor) {
 	PIDController pid;
 	pid.kp = kp;
 	pid.ki = ki;
@@ -14,11 +14,13 @@ PIDController pidControllerInit(float kp, float ki, float kd,
 	pid.ignoreIntegralBounds = true;
 	pid.sensor = sensor;
 	pid.integral_range = 1000;
+	pid.target_reached = false;
+	pid.shouldTerminate = false;
 	pidControllerSetIntegralSpeedBounds(&pid, 0, 127);
 	return pid;
 }
 
-void pidControllerSetTolerance(PIDController *controller, float tolerance){
+void pidControllerSetTolerance(PIDController *controller, float tolerance) {
 	controller->error_tolerance = tolerance;
 }
 
@@ -30,6 +32,8 @@ void pidIgnoreIntegralBounds(PIDController *controller) {
 	controller->ignoreIntegralBounds = true;
 }
 
+//how samll the error needs to be
+// for the integral to be calculated
 void pidSetIntegralRange(PIDController *controller, float integralRange) {
 	controller->integral_range = integralRange;
 }
@@ -48,16 +52,21 @@ void pidStart(PIDController *controller) {
 
 }
 
+void pidTerminateExecutionOfController(PIDController *controller) {
+	controller->shouldTerminate = true;
+}
+
 void pidTask(void *controller) {
 	PIDController pid = *((PIDController *) controller);
 	AccessID id = motorArrayTakeControl(pid.numMotors, pid.motors);
 	pid.target_reached = false;
-	while (!pid.target_reached) {
+	pid.shouldTerminate = false;
+	while (!pid.target_reached || !pid.shouldTerminate) {
 		pid.last_error = pid.error;
 		pid.sensor_reading = sensorGet(pid.sensor);
 		pid.error = pid.sensor_target - pid.sensor_reading;
 
-		lcdDisplayFormattedCenteredString(uart1, 1, "Err: %.2f\n\r", pid.error);
+//		lcdDisplayFormattedCenteredString(uart1, 1, "Err: %.2f\n\r", pid.error);
 
 		if (abs(pid.error) < pid.integral_range) {
 			pid.integral += pid.error;
@@ -101,5 +110,8 @@ void pidTask(void *controller) {
 		pid.setMotorSpeedFunction(pid.motor_speed, id);
 		delay(20);
 	}
-	pid.setMotorSpeedFunction(0);
+	pid.setMotorSpeedFunction(0, id);
+	pid.target_reached = false;
+	pid.shouldTerminate = false;
+	motorArrayReleaseControl(pid.numMotors, pid.motors);
 }

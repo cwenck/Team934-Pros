@@ -60,8 +60,8 @@ void operatorControl() {
 
 //	joystickMainSetShiftButton(Btn6U);
 //	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
-//	pidControllerSetTarget(&liftPID, 7000);
-//	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
+	pidControllerSetTarget(&liftPID, 7000);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
 //	pidStart(&liftPID);
 //	delay(5000);
 //	pidControllerSetTarget(&liftPID, 0);
