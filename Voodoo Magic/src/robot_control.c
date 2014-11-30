@@ -16,22 +16,19 @@ void handleAllInput() {
 const short liftHighPower = 127;
 const short liftLowPower = 80;
 
-void setLiftPower(int speed) {
-	motorPowerSet(topLeftLift, speed);
-	motorPowerSet(middleLeftLift, speed);
-	motorPowerSet(bottomLeftLift, speed);
-	motorPowerSet(topRightLift, speed);
-	motorPowerSet(middleRightLift, speed);
-	motorPowerSet(bottomRightLift, speed);
+void setLiftPower(int speed, AccessID id) {
+	Motor motors[6] = { topLeftLift, middleLeftLift, bottomLeftLift,
+			topRightLift, middleRightLift, bottomRightLift };
+	motorArrayPowerSet(6, motors, speed, id);
 }
 
 void handleLiftInput() {
-	if (readJoystick(liftUp) == 1) {
-		setLiftPower(liftHighPower);
-	} else if (readJoystick(liftDown) == 1) {
-		setLiftPower(-liftHighPower);
+	if (joystickRead(liftUp) == 1) {
+		setLiftPower(liftHighPower, MOTOR_RELEASED_STATE);
+	} else if (joystickRead(liftDown) == 1) {
+		setLiftPower(-liftHighPower, MOTOR_RELEASED_STATE);
 	} else {
-		setLiftPower(0);
+		setLiftPower(0, MOTOR_RELEASED_STATE);
 	}
 }
 
@@ -39,24 +36,24 @@ void handleLiftInput() {
 //Drive//
 /////////
 
-const int DRIVE_THRESHOLD = 5;
+const int DRIVE_THRESHOLD = 10;
 
 /*
  * A positive value for speed is forwards
  * A negetive value for speed is backwards (only works if the direction is same)
  */
-void setRightMotorSpeed(int speed, WheelDirection dir) {
+void setRightMotorSpeed(int speed, WheelDirection dir, AccessID id) {
 	if (dir == same) {
-		motorPowerSet(frontRightWheel, speed);
-		motorPowerSet(backRightWheel, speed);
+		motorPowerSet(frontRightWheel, speed, id);
+		motorPowerSet(backRightWheel, speed, id);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		motorPowerSet(frontRightWheel, -speed);
-		motorPowerSet(backRightWheel, speed);
+		motorPowerSet(frontRightWheel, -speed, id);
+		motorPowerSet(backRightWheel, speed, id);
 	} else if (dir == away) {
 		speed = abs(speed);
-		motorPowerSet(frontRightWheel, speed);
-		motorPowerSet(backRightWheel, -speed);
+		motorPowerSet(frontRightWheel, speed, id);
+		motorPowerSet(backRightWheel, -speed, id);
 	}
 }
 
@@ -64,18 +61,18 @@ void setRightMotorSpeed(int speed, WheelDirection dir) {
  * A positive value for speed is forwards
  * A negetive value for speed is backwards (only works if the direction is same)
  */
-void setLeftMotorSpeed(int speed, WheelDirection dir) {
+void setLeftMotorSpeed(int speed, WheelDirection dir, AccessID id) {
 	if (dir == same) {
-		motorPowerSet(frontLeftWheel, speed);
-		motorPowerSet(backLeftWheel, speed);
+		motorPowerSet(frontLeftWheel, speed, id);
+		motorPowerSet(backLeftWheel, speed, id);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		motorPowerSet(frontLeftWheel, -speed);
-		motorPowerSet(backLeftWheel, speed);
+		motorPowerSet(frontLeftWheel, -speed, id);
+		motorPowerSet(backLeftWheel, speed, id);
 	} else if (dir == away) {
 		speed = abs(speed);
-		motorPowerSet(frontLeftWheel, speed);
-		motorPowerSet(backLeftWheel, -speed);
+		motorPowerSet(frontLeftWheel, speed, id);
+		motorPowerSet(backLeftWheel, -speed, id);
 	}
 }
 
@@ -83,20 +80,20 @@ void setLeftMotorSpeed(int speed, WheelDirection dir) {
  * Strafe left and right at a particular speed
  * or move forawrd or backward
  */
-void strafe(int speed, Direction dir) {
+void strafe(int speed, Direction dir, AccessID id) {
 	speed = abs(speed);
 	if (dir == left) {
-		setLeftMotorSpeed(speed, towards);
-		setRightMotorSpeed(speed, away);
+		setLeftMotorSpeed(speed, towards, id);
+		setRightMotorSpeed(speed, away, id);
 	} else if (dir == right) {
-		setLeftMotorSpeed(speed, away);
-		setRightMotorSpeed(speed, towards);
+		setLeftMotorSpeed(speed, away, id);
+		setRightMotorSpeed(speed, towards, id);
 	} else if (dir == forward) {
-		setLeftMotorSpeed(speed, same);
-		setRightMotorSpeed(speed, same);
+		setLeftMotorSpeed(speed, same, id);
+		setRightMotorSpeed(speed, same, id);
 	} else if (dir == backward) {
-		setLeftMotorSpeed(-speed, same);
-		setRightMotorSpeed(-speed, same);
+		setLeftMotorSpeed(-speed, same, id);
+		setRightMotorSpeed(-speed, same, id);
 	}
 }
 
@@ -104,60 +101,61 @@ void strafe(int speed, Direction dir) {
  * Drive forward or backward or turn left or turn right at a particular speed
  */
 
-void drive(int speed, Direction dir) {
+void drive(int speed, Direction dir, AccessID id) {
 	speed = abs(speed);
 	if (dir == left) {
-		setLeftMotorSpeed(-speed, same);
-		setRightMotorSpeed(speed, same);
+		setLeftMotorSpeed(-speed, same, id);
+		setRightMotorSpeed(speed, same, id);
 	} else if (dir == right) {
-		setLeftMotorSpeed(speed, same);
-		setRightMotorSpeed(-speed, same);
+		setLeftMotorSpeed(speed, same, id);
+		setRightMotorSpeed(-speed, same, id);
 	} else if (dir == forward) {
-		setLeftMotorSpeed(speed, same);
-		setRightMotorSpeed(speed, same);
+		setLeftMotorSpeed(speed, same, id);
+		setRightMotorSpeed(speed, same, id);
 	} else if (dir == backward) {
-		setLeftMotorSpeed(-speed, same);
-		setRightMotorSpeed(-speed, same);
+		setLeftMotorSpeed(-speed, same, id);
+		setRightMotorSpeed(-speed, same, id);
 	}
 }
 
 void handleDriveInput() {
-	int y = readJoystick(forward_backward_drive);
-	int x = readJoystick(left_right_drive);
+	int y = joystickRead(forward_backward_drive);
+	int x = joystickRead(left_right_drive);
 
 	if (abs(y) > abs(x)) {
-		setLeftMotorSpeed(y, same);
-		setRightMotorSpeed(y, same);
+		setLeftMotorSpeed(y, same, MOTOR_RELEASED_STATE);
+		setRightMotorSpeed(y, same, MOTOR_RELEASED_STATE);
 	} else if (abs(x) >= abs(y)) {
-		setLeftMotorSpeed(x, same);
-		setRightMotorSpeed(-x, same);
+		setLeftMotorSpeed(x, same, MOTOR_RELEASED_STATE);
+		setRightMotorSpeed(-x, same, MOTOR_RELEASED_STATE);
 	}
 }
 
 void handleStrafingInput() {
 	if (abs(
-			readJoystick(forward_backward_strafe)
-					> abs(readJoystick(left_right_strafe)))) {
-		if (readJoystick(forward_backward_strafe) > 0) {
-			strafe(readJoystick(forward_backward_strafe), forward);
+			joystickRead(forward_backward_strafe)
+					> abs(joystickRead(left_right_strafe)))) {
+		if (joystickRead(forward_backward_strafe) > 0) {
+			strafe(joystickRead(forward_backward_strafe), forward, MOTOR_RELEASED_STATE);
 		} else {
-			strafe(readJoystick(forward_backward_strafe), backward);
+			strafe(joystickRead(forward_backward_strafe), backward, MOTOR_RELEASED_STATE);
 		}
 	} else {
-		if (readJoystick(left_right_strafe) > 0) {
-			strafe(readJoystick(left_right_strafe), right);
+		if (joystickRead(left_right_strafe) > 0) {
+			strafe(joystickRead(left_right_strafe), right, MOTOR_RELEASED_STATE);
 		} else {
-			strafe(readJoystick(left_right_strafe), left);
+			strafe(joystickRead(left_right_strafe), left, MOTOR_RELEASED_STATE);
 		}
 	}
 }
 
 //Decides whether to drive or strafe
 void handleDriveOrStrafing() {
-	if (abs(readJoystick(forward_backward_drive)) <= DRIVE_THRESHOLD
-			&& abs(readJoystick(left_right_drive)) <= DRIVE_THRESHOLD) {
+	if (abs(joystickRead(forward_backward_drive)) <= DRIVE_THRESHOLD
+			&& abs(joystickRead(left_right_drive)) <= DRIVE_THRESHOLD) {
 		handleStrafingInput();
-	} else {
+	} else if (abs(joystickRead(forward_backward_drive)) > DRIVE_THRESHOLD
+			|| abs(joystickRead(left_right_drive)) > DRIVE_THRESHOLD) {
 		handleDriveInput();
 	}
 }
@@ -171,12 +169,14 @@ int inchesToLiftEncoderTicks(float inches) {
 	int ticks = 0;
 
 	if (value > ticksTillIntakeUncompressed) {
-		ticks = ticksTillIntakeUncompressed + (int) (inches * liftEncoderTicksPerInch);
+		ticks = ticksTillIntakeUncompressed
+				+ (int) (inches * liftEncoderTicksPerInch);
 	} else {
-		ticks = ticksTillIntakeUncompressed + (int) (inches * liftEncoderTicksPerInch);
+		ticks = ticksTillIntakeUncompressed
+				+ (int) (inches * liftEncoderTicksPerInch);
 	}
 
-	if(ticks > maxLiftEncoderTicks){
+	if (ticks > maxLiftEncoderTicks) {
 		ticks = maxLiftEncoderTicks;
 	}
 
@@ -185,14 +185,16 @@ int inchesToLiftEncoderTicks(float inches) {
 int feetToLiftEncoderTicks(float feet) {
 	int value = sensorGet(liftEncoder);
 	int ticks = 0;
-	
+
 	if (value > ticksTillIntakeUncompressed) {
-		ticks =  ticksTillIntakeUncompressed + (int) (feet * liftEncoderTicksPerInch * 12);
+		ticks = ticksTillIntakeUncompressed
+				+ (int) (feet * liftEncoderTicksPerInch * 12);
 	} else {
-		ticks =  ticksTillIntakeUncompressed + (int) (feet * liftEncoderTicksPerInch * 12);
+		ticks = ticksTillIntakeUncompressed
+				+ (int) (feet * liftEncoderTicksPerInch * 12);
 	}
 
-	if(ticks > maxLiftEncoderTicks){
+	if (ticks > maxLiftEncoderTicks) {
 		ticks = maxLiftEncoderTicks;
 	}
 
@@ -203,26 +205,26 @@ int feetToLiftEncoderTicks(float feet) {
 //PID Controllable Drive Funtions//
 ///////////////////////////////////
 
-void driveForwardBackward(int speed) {
+void driveForwardBackward(int speed, AccessID id) {
 	if (speed >= 0) {
-		drive(speed, forward);
+		drive(speed, forward, id);
 	} else {
-		drive(speed, backward);
+		drive(speed, backward, id);
 	}
 }
 
-void turnLeftRight(int speed) {
+void turnLeftRight(int speed, AccessID id) {
 	if (speed >= 0) {
-		drive(speed, right);
+		drive(speed, right, id);
 	} else {
-		drive(speed, left);
+		drive(speed, left, id);
 	}
 }
 
-void strafeLeftRight(int speed) {
+void strafeLeftRight(int speed, AccessID id) {
 	if (speed >= 0) {
-		strafe(speed, right);
+		strafe(speed, right, id);
 	} else {
-		strafe(speed, left);
+		strafe(speed, left, id);
 	}
 }

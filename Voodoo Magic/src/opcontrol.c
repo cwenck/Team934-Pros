@@ -51,30 +51,30 @@
  *
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
+
 void operatorControl() {
 //	executeAutonIfJumperInPort(Digital_12);
 //	int value;
 	integratedEncoderResetAll();
 	sensorReset(liftEncoder);
 
-
-	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
+//	joystickMainSetShiftButton(Btn6U);
+//	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
 //	pidControllerSetTarget(&liftPID, 7000);
-	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
+//	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
 //	pidStart(&liftPID);
-	delay(5000);
+//	delay(5000);
 //	pidControllerSetTarget(&liftPID, 0);
 //	pidStart(&liftPID);
 	while (1) {
-		lcdDisplayFormattedCenteredString(uart1, 1, "Lift: %d", sensorGet(liftEncoder));
-		if(readJoystick(Btn8U) == 1){
-			sensorReset(liftEncoder);
-		}
-		//		lcdDisplayBatteryStatus(uart1 );
-//		FILE *auton_file = fopen("AUTON", "w");//		*auton_file
-		printf("Lift: %d\n\r", sensorGet(liftEncoder));
-		handleDriveOrStrafing();
-		handleLiftInput();
+//		lcdDisplayFormattedCenteredString(uart1, 1, "Lift: %d", sensorGet(liftEncoder));
+//		if(joystickRead(Btn8U) == 1){
+//			sensorReset(liftEncoder);
+
+//		}
+//		printf("Norm: %d Shift:%d\n\r", joystickRead(Ch3), joystickRead(Shift_Ch3));
+//		handleDriveOrStrafing();
+//		handleLiftInput();
 		delay(50);
 	}
 }

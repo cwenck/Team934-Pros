@@ -4,7 +4,42 @@
 //Joystick//
 ////////////
 
-unsigned char getNumConnectedJoysticks() {
+JoyInput mainShiftBtn = -1;
+JoyInput partnerShiftBtn = -1;
+
+bool joystickIsShiftedInput(JoyInput input) {
+	if (input >= Shift_Btn5U && input <= Shift_Partner_Ch4) {
+		return true;
+	}
+	return false;
+}
+
+bool joystickIsInputButton(JoyInput input) {
+	return ((input >= Btn5U && input <= Btn8R)
+			|| (input >= Partner_Btn5U && input <= Partner_Btn8R)
+			|| (input >= Shift_Btn5U && input <= Shift_Btn8R)
+			|| (input >= Shift_Partner_Btn5U && input <= Shift_Partner_Btn8R));
+}
+
+bool joystickMainSetShiftButton(JoyInput input) {
+	JoyInputInfo in = joystickGetInputInfo(input);
+	if (in.isButton && in.joystick == 1 && !in.shifted) {
+		mainShiftBtn = input;
+		return true;
+	}
+	return false;
+}
+
+bool joystickPartnerSetShiftButton(JoyInput input) {
+	JoyInputInfo in = joystickGetInputInfo(input);
+	if (in.isButton && in.joystick == 2 && !in.shifted) {
+		partnerShiftBtn = input;
+		return true;
+	}
+	return false;
+}
+
+unsigned char joysticksGetNumConnected() {
 	unsigned char joysticksConnected = 0;
 	if (isJoystickConnected(1)) {
 		joysticksConnected++;
@@ -15,153 +50,359 @@ unsigned char getNumConnectedJoysticks() {
 	return joysticksConnected;
 }
 
-int readJoystick(JoyInput input) {
-	unsigned char joy = 1;
-	unsigned char channel;
-	unsigned char btn;
+bool joystickIsMainShiftKeyPressed() {
+	JoyInputInfo in = joystickGetInputInfo(mainShiftBtn);
+	if (mainShiftBtn == -1) {
+		return false;
+	}
+	return joystickGetDigital(1, in.channel, in.btn);
+}
+
+bool joystickIsPartnerShiftKeyPressed() {
+	JoyInputInfo in = joystickGetInputInfo(partnerShiftBtn);
+	if (partnerShiftBtn == -1) {
+		return false;
+	}
+	return joystickGetDigital(2, in.channel, in.btn);
+}
+
+JoyInputInfo joystickGetInputInfo(JoyInput input) {
+	JoyInputInfo info;
+
+	info.joystick = 1;
+	info.shifted = joystickIsShiftedInput(input);
+	info.isButton = joystickIsInputButton(input);
+
 	switch (input) {
 	case Btn5U:
-		channel = 5;
-		btn = JOY_UP;
+		info.channel = 5;
+		info.btn = JOY_UP;
 		break;
 	case Btn6U:
-		channel = 6;
-		btn = JOY_UP;
+		info.channel = 6;
+		info.btn = JOY_UP;
 		break;
 	case Btn7U:
-		channel = 7;
-		btn = JOY_UP;
+		info.channel = 7;
+		info.btn = JOY_UP;
 		break;
 	case Btn8U:
-		channel = 8;
-		btn = JOY_UP;
+		info.channel = 8;
+		info.btn = JOY_UP;
 		break;
 	case Btn5D:
-		channel = 5;
-		btn = JOY_DOWN;
+		info.channel = 5;
+		info.btn = JOY_DOWN;
 		break;
 	case Btn6D:
-		channel = 6;
-		btn = JOY_DOWN;
+		info.channel = 6;
+		info.btn = JOY_DOWN;
 		break;
 	case Btn7D:
-		channel = 7;
-		btn = JOY_DOWN;
+		info.channel = 7;
+		info.btn = JOY_DOWN;
 		break;
 	case Btn8D:
-		channel = 8;
-		btn = JOY_DOWN;
+		info.channel = 8;
+		info.btn = JOY_DOWN;
 		break;
 	case Btn7L:
-		channel = 7;
-		btn = JOY_LEFT;
+		info.channel = 7;
+		info.btn = JOY_LEFT;
 		break;
 	case Btn8L:
-		channel = 8;
-		btn = JOY_LEFT;
+		info.channel = 8;
+		info.btn = JOY_LEFT;
 		break;
 	case Btn7R:
-		channel = 7;
-		btn = JOY_RIGHT;
+		info.channel = 7;
+		info.btn = JOY_RIGHT;
 		break;
 	case Btn8R:
-		channel = 8;
-		btn = JOY_RIGHT;
+		info.channel = 8;
+		info.btn = JOY_RIGHT;
 		break;
 	case Ch1:
-		channel = 1;
+		info.channel = 1;
 		break;
 	case Ch2:
-		channel = 2;
+		info.channel = 2;
 		break;
 	case Ch3:
-		channel = 3;
+		info.channel = 3;
 		break;
 	case Ch4:
-		channel = 4;
+		info.channel = 4;
 		break;
 	case Partner_Btn5U:
-		channel = 5;
-		btn = JOY_UP;
-		joy = 2;
+		info.channel = 5;
+		info.btn = JOY_UP;
+		info.joystick = 2;
 		break;
 	case Partner_Btn6U:
-		channel = 6;
-		btn = JOY_UP;
-		joy = 2;
+		info.channel = 6;
+		info.btn = JOY_UP;
+		info.joystick = 2;
 		break;
 	case Partner_Btn7U:
-		channel = 7;
-		btn = JOY_UP;
-		joy = 2;
+		info.channel = 7;
+		info.btn = JOY_UP;
+		info.joystick = 2;
 		break;
 	case Partner_Btn8U:
-		channel = 8;
-		btn = JOY_UP;
-		joy = 2;
+		info.channel = 8;
+		info.btn = JOY_UP;
+		info.joystick = 2;
 		break;
 	case Partner_Btn5D:
-		channel = 5;
-		btn = JOY_DOWN;
-		joy = 2;
+		info.channel = 5;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
 		break;
 	case Partner_Btn6D:
-		channel = 6;
-		btn = JOY_DOWN;
-		joy = 2;
+		info.channel = 6;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
 		break;
 	case Partner_Btn7D:
-		channel = 7;
-		btn = JOY_DOWN;
-		joy = 2;
+		info.channel = 7;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
 		break;
 	case Partner_Btn8D:
-		channel = 8;
-		btn = JOY_DOWN;
-		joy = 2;
+		info.channel = 8;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
 		break;
 	case Partner_Btn7L:
-		channel = 7;
-		btn = JOY_LEFT;
-		joy = 2;
+		info.channel = 7;
+		info.btn = JOY_LEFT;
+		info.joystick = 2;
 		break;
 	case Partner_Btn8L:
-		channel = 8;
-		btn = JOY_LEFT;
-		joy = 2;
+		info.channel = 8;
+		info.btn = JOY_LEFT;
+		info.joystick = 2;
 		break;
 	case Partner_Btn7R:
-		channel = 7;
-		btn = JOY_RIGHT;
-		joy = 2;
+		info.channel = 7;
+		info.btn = JOY_RIGHT;
+		info.joystick = 2;
 		break;
 	case Partner_Btn8R:
-		channel = 8;
-		btn = JOY_RIGHT;
-		joy = 2;
+		info.channel = 8;
+		info.btn = JOY_RIGHT;
+		info.joystick = 2;
 		break;
 	case Partner_Ch1:
-		channel = 1;
-		joy = 2;
+		info.channel = 1;
+		info.joystick = 2;
 		break;
 	case Partner_Ch2:
-		channel = 2;
-		joy = 2;
+		info.channel = 2;
+		info.joystick = 2;
 		break;
 	case Partner_Ch3:
-		channel = 3;
-		joy = 2;
+		info.channel = 3;
+		info.joystick = 2;
 		break;
 	case Partner_Ch4:
-		channel = 4;
-		joy = 2;
+		info.channel = 4;
+		info.joystick = 2;
+		break;
+	case Shift_Btn5U:
+		info.channel = 5;
+		info.btn = JOY_UP;
+		break;
+	case Shift_Btn6U:
+		info.channel = 6;
+		info.btn = JOY_UP;
+		break;
+	case Shift_Btn7U:
+		info.channel = 7;
+		info.btn = JOY_UP;
+		break;
+	case Shift_Btn8U:
+		info.channel = 8;
+		info.btn = JOY_UP;
+		break;
+	case Shift_Btn5D:
+		info.channel = 5;
+		info.btn = JOY_DOWN;
+		break;
+	case Shift_Btn6D:
+		info.channel = 6;
+		info.btn = JOY_DOWN;
+		break;
+	case Shift_Btn7D:
+		info.channel = 7;
+		info.btn = JOY_DOWN;
+		break;
+	case Shift_Btn8D:
+		info.channel = 8;
+		info.btn = JOY_DOWN;
+		break;
+	case Shift_Btn7L:
+		info.channel = 7;
+		info.btn = JOY_LEFT;
+		break;
+	case Shift_Btn8L:
+		info.channel = 8;
+		info.btn = JOY_LEFT;
+		break;
+	case Shift_Btn7R:
+		info.channel = 7;
+		info.btn = JOY_RIGHT;
+		break;
+	case Shift_Btn8R:
+		info.channel = 8;
+		info.btn = JOY_RIGHT;
+		break;
+	case Shift_Ch1:
+		info.channel = 1;
+		break;
+	case Shift_Ch2:
+		info.channel = 2;
+		break;
+	case Shift_Ch3:
+		info.channel = 3;
+		break;
+	case Shift_Ch4:
+		info.channel = 4;
+		break;
+	case Shift_Partner_Btn5U:
+		info.channel = 5;
+		info.btn = JOY_UP;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn6U:
+		info.channel = 6;
+		info.btn = JOY_UP;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn7U:
+		info.channel = 7;
+		info.btn = JOY_UP;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn8U:
+		info.channel = 8;
+		info.btn = JOY_UP;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn5D:
+		info.channel = 5;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn6D:
+		info.channel = 6;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn7D:
+		info.channel = 7;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn8D:
+		info.channel = 8;
+		info.btn = JOY_DOWN;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn7L:
+		info.channel = 7;
+		info.btn = JOY_LEFT;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn8L:
+		info.channel = 8;
+		info.btn = JOY_LEFT;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn7R:
+		info.channel = 7;
+		info.btn = JOY_RIGHT;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Btn8R:
+		info.channel = 8;
+		info.btn = JOY_RIGHT;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Ch1:
+		info.channel = 1;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Ch2:
+		info.channel = 2;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Ch3:
+		info.channel = 3;
+		info.joystick = 2;
+		break;
+	case Shift_Partner_Ch4:
+		info.channel = 4;
+		info.joystick = 2;
 		break;
 	}
-	if (channel == 1 || channel == 2 || channel == 3 || channel == 4) {
-		return joystickGetAnalog(joy, channel);
+	return info;
+}
+
+int joystickRead(JoyInput input) {
+
+	JoyInputInfo in = joystickGetInputInfo(input);
+
+	if (in.joystick == 1) {
+		if (in.shifted && joystickIsMainShiftKeyPressed()) {
+			if (in.channel == 1 || in.channel == 2 || in.channel == 3
+					|| in.channel == 4) {
+				return joystickGetAnalog(in.joystick, in.channel);
+			} else {
+				if (joystickGetDigital(in.joystick, in.channel, in.btn)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		} else if (!in.shifted && !joystickIsMainShiftKeyPressed()) {
+			if (in.channel == 1 || in.channel == 2 || in.channel == 3
+					|| in.channel == 4) {
+				return joystickGetAnalog(in.joystick, in.channel);
+			} else {
+				if (joystickGetDigital(in.joystick, in.channel, in.btn)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		} else {
+			return 0;
+		}
 	} else {
-		if (joystickGetDigital(joy, channel, btn)) {
-			return 1;
+		if (in.shifted && joystickIsMainShiftKeyPressed()) {
+			if (in.channel == 1 || in.channel == 2 || in.channel == 3
+					|| in.channel == 4) {
+				return joystickGetAnalog(in.joystick, in.channel);
+			} else {
+				if (joystickGetDigital(in.joystick, in.channel, in.btn)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		} else if (!in.shifted && !joystickIsMainShiftKeyPressed()) {
+			if (in.channel == 1 || in.channel == 2 || in.channel == 3
+					|| in.channel == 4) {
+				return joystickGetAnalog(in.joystick, in.channel);
+			} else {
+				if (joystickGetDigital(in.joystick, in.channel, in.btn)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
 		} else {
 			return 0;
 		}

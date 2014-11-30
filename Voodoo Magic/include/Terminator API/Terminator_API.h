@@ -15,6 +15,8 @@
 //Pins 21+22 are UART1, 23+24 are UART2, and 25+26 are the I2C port.
 
 #include <Math.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "stdio_print_header.h"
 

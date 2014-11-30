@@ -42,12 +42,15 @@ void pidControllerSetIntegralSpeedBounds(PIDController *controller,
 }
 
 void pidStart(PIDController *controller) {
+
 	taskCreate(pidTask, TASK_DEFAULT_STACK_SIZE, controller,
 			TASK_PRIORITY_DEFAULT);
+
 }
 
 void pidTask(void *controller) {
 	PIDController pid = *((PIDController *) controller);
+	AccessID id = motorArrayTakeControl(pid.numMotors, pid.motors);
 	pid.target_reached = false;
 	while (!pid.target_reached) {
 		pid.last_error = pid.error;
@@ -95,7 +98,7 @@ void pidTask(void *controller) {
 		pid.i_speed = pid.integral * pid.ki;
 		pid.d_speed = pid.derivative * pid.kd;
 		pid.motor_speed = pid.p_speed + pid.i_speed + pid.d_speed;
-		pid.setMotorSpeedFunction(pid.motor_speed);
+		pid.setMotorSpeedFunction(pid.motor_speed, id);
 		delay(20);
 	}
 	pid.setMotorSpeedFunction(0);

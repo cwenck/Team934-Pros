@@ -21,5 +21,10 @@ typedef enum _MotorType MotorType;
 typedef struct _Motor Motor;
 typedef struct _IntegratedEncoder IntegratedEncoder;
 typedef enum _JoyInput JoyInput;
+typedef struct _JoyInputInfo JoyInputInfo;
+typedef struct _PIDController PIDController;
+typedef enum _WheelDirection WheelDirection;
+typedef enum _Direction Direction;
+typedef short AccessID;
 
 #endif /* TYPEDEFS_H_ */

@@ -15,7 +15,7 @@
 //PID//
 ///////
 
-typedef struct {
+struct _PIDController{
 	float kp;
 	float ki;
 	float kd;
@@ -40,9 +40,11 @@ typedef struct {
 	float integral_min;
 	float integral_max;
 	float derivative;
-	void (*setMotorSpeedFunction)(int);
 	Sensor sensor;
-} PIDController;
+	void (*setMotorSpeedFunction)(int, AccessID);
+	int numMotors;
+	Motor motors[];
+};
 
 PIDController pidControllerInit(float kp, float ki, float kd,
 		void (*setMotorSpeedFunction)(int), Sensor sensor);
