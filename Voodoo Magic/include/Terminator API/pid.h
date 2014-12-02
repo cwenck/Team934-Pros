@@ -42,13 +42,13 @@ struct _PIDController{
 	float integral_max;
 	float derivative;
 	Sensor sensor;
-	void (*setMotorSpeedFunction)(int, AccessID);
+	void (*setMotorSpeedFunction)(int, MotorAccessController);
 	int numMotors;
 	Motor motors[];
 };
 
 PIDController pidControllerInit(float kp, float ki, float kd,
-		void (*setMotorSpeedFunction)(int, AccessID), Sensor sensor);
+		void (*setMotorSpeedFunction)(int, MotorAccessController), Sensor sensor);
 void pidControllerSetTarget(PIDController *controller, float target);
 void pidControllerSetTolerance(PIDController *controller, float tolerance);
 void pidSetIntegralRange(PIDController *controller, float integralRange);

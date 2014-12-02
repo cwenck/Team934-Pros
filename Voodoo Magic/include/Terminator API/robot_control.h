@@ -23,11 +23,11 @@ enum _Direction{
 extern const int DRIVE_THRESHOLD;
 
 //functions
-void setRightMotorSpeed(int speed, WheelDirection dir, AccessID id);
-void setLeftMotorSpeed(int speed, WheelDirection dir, AccessID id);
+void setRightMotorSpeed(int speed, WheelDirection dir, MotorAccessController controller);
+void setLeftMotorSpeed(int speed, WheelDirection dir, MotorAccessController controller);
 
-void strafe(int speed, Direction dir, AccessID id);
-void drive(int speed, Direction dir, AccessID id);
+void strafe(int speed, Direction dir, MotorAccessController controller);
+void drive(int speed, Direction dir, MotorAccessController controller);
 
 void handleDriveInput();
 void handleStrafingInput();
@@ -44,7 +44,7 @@ extern const short liftLowPower;
 
 //functions
 void handleLiftInput();
-void setLiftPower(int speed, AccessID id);
+void setLiftPower(int speed, MotorAccessController controller);
 
 int inchesToLiftEncoderTicks(float inches);
 int feetToLiftEncoderTicks(float feet);
@@ -54,14 +54,14 @@ int feetToLiftEncoderTicks(float feet);
 ///////////////////////////////////
 
 //negative is backward, positive is forward
-void driveForwardBackward(int speed, AccessID id);
+void driveForwardBackward(int speed,  MotorAccessController controller);
 
 //negative is left, positive is right
 //magnitude is motor power
-void turnLeftRight(int speed, AccessID id);
+void turnLeftRight(int speed,  MotorAccessController controller);
 
 //negative is left, positive is right
 //magnitude is motor power
-void strafeLeftRight(int speed, AccessID id);
+void strafeLeftRight(int speed,  MotorAccessController controller);
 
 #endif /* ROBOT_CONTROL_H_ */

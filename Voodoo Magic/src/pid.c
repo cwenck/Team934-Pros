@@ -5,7 +5,7 @@
 ///////
 
 PIDController pidControllerInit(float kp, float ki, float kd,
-		void (*setMotorSpeedFunction)(int, AccessID), Sensor sensor) {
+		void (*setMotorSpeedFunction)(int, MotorAccessController), Sensor sensor) {
 	PIDController pid;
 	pid.kp = kp;
 	pid.ki = ki;
@@ -58,60 +58,62 @@ void pidTerminateExecutionOfController(PIDController *controller) {
 
 void pidTask(void *controller) {
 	PIDController pid = *((PIDController *) controller);
-	AccessID id = motorArrayTakeControl(pid.numMotors, pid.motors);
-	pid.target_reached = false;
-	pid.shouldTerminate = false;
-	while (!pid.target_reached || !pid.shouldTerminate) {
-		pid.last_error = pid.error;
-		pid.sensor_reading = sensorGet(pid.sensor);
-		pid.error = pid.sensor_target - pid.sensor_reading;
+	if (motorArrayTakeControl(pid.numMotors, pid.motors,
+			MOTOR_PID_CONTROLLED)) {
+		pid.target_reached = false;
+		pid.shouldTerminate = false;
+		while (!pid.target_reached || !pid.shouldTerminate) {
+			pid.last_error = pid.error;
+			pid.sensor_reading = sensorGet(pid.sensor);
+			pid.error = pid.sensor_target - pid.sensor_reading;
 
 //		lcdDisplayFormattedCenteredString(uart1, 1, "Err: %.2f\n\r", pid.error);
 
-		if (abs(pid.error) < pid.integral_range) {
-			pid.integral += pid.error;
-		} else {
-			pid.integral = 0;
-		}
-		pid.derivative = pid.error - pid.last_error;
+			if (abs(pid.error) < pid.integral_range) {
+				pid.integral += pid.error;
+			} else {
+				pid.integral = 0;
+			}
+			pid.derivative = pid.error - pid.last_error;
 
-		if (!pid.ignoreIntegralBounds) {
-			if (abs(pid.integral) > pid.integral_max) {
-				if (pid.integral > 0) {
-					pid.integral = pid.integral_max;
-				} else {
-					pid.integral = -pid.integral_max;
-				}
-			} else if (abs(pid.integral) < pid.integral_min) {
-				if (pid.integral > 0) {
-					pid.integral = pid.integral_min;
-				} else {
-					pid.integral = -pid.integral_min;
+			if (!pid.ignoreIntegralBounds) {
+				if (abs(pid.integral) > pid.integral_max) {
+					if (pid.integral > 0) {
+						pid.integral = pid.integral_max;
+					} else {
+						pid.integral = -pid.integral_max;
+					}
+				} else if (abs(pid.integral) < pid.integral_min) {
+					if (pid.integral > 0) {
+						pid.integral = pid.integral_min;
+					} else {
+						pid.integral = -pid.integral_min;
+					}
 				}
 			}
-		}
 
-		if (abs(pid.error) <= abs(pid.error_tolerance)) {
-			pid.integral = 0;
-			pid.num_checks_passed++;
-			if (pid.num_checks_passed > 3) {
-				pid.target_reached = true;
+			if (abs(pid.error) <= abs(pid.error_tolerance)) {
+				pid.integral = 0;
+				pid.num_checks_passed++;
+				if (pid.num_checks_passed > 3) {
+					pid.target_reached = true;
+				}
+			} else {
+				pid.num_checks_passed = 0;
+				pid.target_reached = false;
 			}
-		} else {
-			pid.num_checks_passed = 0;
-			pid.target_reached = false;
+			printf("Err: %.2f -- ISpd: %d -- I: %.2f\n\r", pid.error,
+					pid.i_speed, pid.integral);
+			pid.p_speed = pid.error * pid.kp;
+			pid.i_speed = pid.integral * pid.ki;
+			pid.d_speed = pid.derivative * pid.kd;
+			pid.motor_speed = pid.p_speed + pid.i_speed + pid.d_speed;
+			pid.setMotorSpeedFunction(pid.motor_speed, MOTOR_PID_CONTROLLED);
+			delay(20);
 		}
-		printf("Err: %.2f -- ISpd: %d -- I: %.2f\n\r", pid.error, pid.i_speed,
-				pid.integral);
-		pid.p_speed = pid.error * pid.kp;
-		pid.i_speed = pid.integral * pid.ki;
-		pid.d_speed = pid.derivative * pid.kd;
-		pid.motor_speed = pid.p_speed + pid.i_speed + pid.d_speed;
-		pid.setMotorSpeedFunction(pid.motor_speed, id);
-		delay(20);
+		pid.setMotorSpeedFunction(0, MOTOR_PID_CONTROLLED);
+		pid.target_reached = false;
+		pid.shouldTerminate = false;
 	}
-	pid.setMotorSpeedFunction(0, id);
-	pid.target_reached = false;
-	pid.shouldTerminate = false;
 	motorArrayReleaseControl(pid.numMotors, pid.motors);
 }

@@ -22,6 +22,7 @@
 
 #include "typedefs.h"
 
+#include "motor_control_priorities.h"
 #include "motor.h"
 #include "sensors.h"
 #include "joystick.h"

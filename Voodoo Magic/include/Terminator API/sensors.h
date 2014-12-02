@@ -8,6 +8,8 @@
 #include "main.h"
 #include "motor.h"
 
+#define PORT_INCORRECT_PIN_MODE -1;
+
 enum _SensorType{
 	Sensor_IntegratedEncoder,	//IC2
 	Sensor_QuadEncoder,			//Digital

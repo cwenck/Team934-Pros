@@ -16,20 +16,23 @@ void handleAllInput() {
 const short liftHighPower = 127;
 const short liftLowPower = 80;
 
-void setLiftPower(int speed, AccessID id) {
-	Motor motors[6] = { topLeftLift, middleLeftLift, bottomLeftLift,
-			topRightLift, middleRightLift, bottomRightLift };
-	motorArrayPowerSet(6, motors, speed, id);
+void setLiftPower(int speed, MotorAccessController controller) {
+	motorArrayPowerSet(NUM_LIFT_MOTORS, liftMotors, speed, controller);
 }
 
 void handleLiftInput() {
-	if (joystickRead(liftUp) == 1) {
-		setLiftPower(liftHighPower, MOTOR_RELEASED_STATE);
-	} else if (joystickRead(liftDown) == 1) {
-		setLiftPower(-liftHighPower, MOTOR_RELEASED_STATE);
-	} else {
-		setLiftPower(0, MOTOR_RELEASED_STATE);
+	motorArrayTakeControl(NUM_LIFT_MOTORS, liftMotors,
+			MOTOR_JOYSTICK_CONTROLLED);
+	{
+		if (joystickRead(liftUp) == 1) {
+			setLiftPower(liftHighPower, MOTOR_JOYSTICK_CONTROLLED);
+		} else if (joystickRead(liftDown) == 1) {
+			setLiftPower(-liftHighPower, MOTOR_JOYSTICK_CONTROLLED);
+		} else {
+			setLiftPower(0, MOTOR_JOYSTICK_CONTROLLED);
+		}
 	}
+	motorArrayReleaseControl(NUM_LIFT_MOTORS, liftMotors);
 }
 
 /////////
@@ -42,18 +45,19 @@ const int DRIVE_THRESHOLD = 10;
  * A positive value for speed is forwards
  * A negetive value for speed is backwards (only works if the direction is same)
  */
-void setRightMotorSpeed(int speed, WheelDirection dir, AccessID id) {
+void setRightMotorSpeed(int speed, WheelDirection dir,
+		MotorAccessController controller) {
 	if (dir == same) {
-		motorPowerSet(frontRightWheel, speed, id);
-		motorPowerSet(backRightWheel, speed, id);
+		motorPowerSet(frontRightWheel, speed, controller);
+		motorPowerSet(backRightWheel, speed, controller);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		motorPowerSet(frontRightWheel, -speed, id);
-		motorPowerSet(backRightWheel, speed, id);
+		motorPowerSet(frontRightWheel, -speed, controller);
+		motorPowerSet(backRightWheel, speed, controller);
 	} else if (dir == away) {
 		speed = abs(speed);
-		motorPowerSet(frontRightWheel, speed, id);
-		motorPowerSet(backRightWheel, -speed, id);
+		motorPowerSet(frontRightWheel, speed, controller);
+		motorPowerSet(backRightWheel, -speed, controller);
 	}
 }
 
@@ -61,18 +65,19 @@ void setRightMotorSpeed(int speed, WheelDirection dir, AccessID id) {
  * A positive value for speed is forwards
  * A negetive value for speed is backwards (only works if the direction is same)
  */
-void setLeftMotorSpeed(int speed, WheelDirection dir, AccessID id) {
+void setLeftMotorSpeed(int speed, WheelDirection dir,
+		MotorAccessController controller) {
 	if (dir == same) {
-		motorPowerSet(frontLeftWheel, speed, id);
-		motorPowerSet(backLeftWheel, speed, id);
+		motorPowerSet(frontLeftWheel, speed, controller);
+		motorPowerSet(backLeftWheel, speed, controller);
 	} else if (dir == towards) {
 		speed = abs(speed);
-		motorPowerSet(frontLeftWheel, -speed, id);
-		motorPowerSet(backLeftWheel, speed, id);
+		motorPowerSet(frontLeftWheel, -speed, controller);
+		motorPowerSet(backLeftWheel, speed, controller);
 	} else if (dir == away) {
 		speed = abs(speed);
-		motorPowerSet(frontLeftWheel, speed, id);
-		motorPowerSet(backLeftWheel, -speed, id);
+		motorPowerSet(frontLeftWheel, speed, controller);
+		motorPowerSet(backLeftWheel, -speed, controller);
 	}
 }
 
@@ -80,20 +85,20 @@ void setLeftMotorSpeed(int speed, WheelDirection dir, AccessID id) {
  * Strafe left and right at a particular speed
  * or move forawrd or backward
  */
-void strafe(int speed, Direction dir, AccessID id) {
+void strafe(int speed, Direction dir, MotorAccessController controller) {
 	speed = abs(speed);
 	if (dir == left) {
-		setLeftMotorSpeed(speed, towards, id);
-		setRightMotorSpeed(speed, away, id);
+		setLeftMotorSpeed(speed, towards, controller);
+		setRightMotorSpeed(speed, away, controller);
 	} else if (dir == right) {
-		setLeftMotorSpeed(speed, away, id);
-		setRightMotorSpeed(speed, towards, id);
+		setLeftMotorSpeed(speed, away, controller);
+		setRightMotorSpeed(speed, towards, controller);
 	} else if (dir == forward) {
-		setLeftMotorSpeed(speed, same, id);
-		setRightMotorSpeed(speed, same, id);
+		setLeftMotorSpeed(speed, same, controller);
+		setRightMotorSpeed(speed, same, controller);
 	} else if (dir == backward) {
-		setLeftMotorSpeed(-speed, same, id);
-		setRightMotorSpeed(-speed, same, id);
+		setLeftMotorSpeed(-speed, same, controller);
+		setRightMotorSpeed(-speed, same, controller);
 	}
 }
 
@@ -101,26 +106,30 @@ void strafe(int speed, Direction dir, AccessID id) {
  * Drive forward or backward or turn left or turn right at a particular speed
  */
 
-void drive(int speed, Direction dir, AccessID id) {
+void drive(int speed, Direction dir, MotorAccessController controller) {
+	motorArrayTakeControl(NUM_DRIVE_MOTORS, driveMotors, controller);
 	speed = abs(speed);
 	if (dir == left) {
-		setLeftMotorSpeed(-speed, same, id);
-		setRightMotorSpeed(speed, same, id);
+		setLeftMotorSpeed(-speed, same, controller);
+		setRightMotorSpeed(speed, same, controller);
 	} else if (dir == right) {
-		setLeftMotorSpeed(speed, same, id);
-		setRightMotorSpeed(-speed, same, id);
+		setLeftMotorSpeed(speed, same, controller);
+		setRightMotorSpeed(-speed, same, controller);
 	} else if (dir == forward) {
-		setLeftMotorSpeed(speed, same, id);
-		setRightMotorSpeed(speed, same, id);
+		setLeftMotorSpeed(speed, same, controller);
+		setRightMotorSpeed(speed, same, controller);
 	} else if (dir == backward) {
-		setLeftMotorSpeed(-speed, same, id);
-		setRightMotorSpeed(-speed, same, id);
+		setLeftMotorSpeed(-speed, same, controller);
+		setRightMotorSpeed(-speed, same, controller);
 	}
+	motorArrayReleaseControl(NUM_DRIVE_MOTORS, driveMotors);
 }
 
 void handleDriveInput() {
 	int y = joystickRead(forward_backward_drive);
 	int x = joystickRead(left_right_drive);
+
+	motorArrayTakeControl(NUM_DRIVE_MOTORS, driveMotors, MOTOR_JOYSTICK_CONTROLLED);
 
 	if (abs(y) > abs(x)) {
 		setLeftMotorSpeed(y, same, MOTOR_RELEASED_STATE);
@@ -129,6 +138,8 @@ void handleDriveInput() {
 		setLeftMotorSpeed(x, same, MOTOR_RELEASED_STATE);
 		setRightMotorSpeed(-x, same, MOTOR_RELEASED_STATE);
 	}
+
+	motorArrayReleaseControl(NUM_DRIVE_MOTORS, driveMotors);
 }
 
 void handleStrafingInput() {
@@ -136,13 +147,16 @@ void handleStrafingInput() {
 			joystickRead(forward_backward_strafe)
 					> abs(joystickRead(left_right_strafe)))) {
 		if (joystickRead(forward_backward_strafe) > 0) {
-			strafe(joystickRead(forward_backward_strafe), forward, MOTOR_RELEASED_STATE);
+			strafe(joystickRead(forward_backward_strafe), forward,
+					MOTOR_RELEASED_STATE);
 		} else {
-			strafe(joystickRead(forward_backward_strafe), backward, MOTOR_RELEASED_STATE);
+			strafe(joystickRead(forward_backward_strafe), backward,
+					MOTOR_RELEASED_STATE);
 		}
 	} else {
 		if (joystickRead(left_right_strafe) > 0) {
-			strafe(joystickRead(left_right_strafe), right, MOTOR_RELEASED_STATE);
+			strafe(joystickRead(left_right_strafe), right,
+					MOTOR_RELEASED_STATE);
 		} else {
 			strafe(joystickRead(left_right_strafe), left, MOTOR_RELEASED_STATE);
 		}
@@ -205,26 +219,26 @@ int feetToLiftEncoderTicks(float feet) {
 //PID Controllable Drive Funtions//
 ///////////////////////////////////
 
-void driveForwardBackward(int speed, AccessID id) {
+void driveForwardBackward(int speed, MotorAccessController controller) {
 	if (speed >= 0) {
-		drive(speed, forward, id);
+		drive(speed, forward, controller);
 	} else {
-		drive(speed, backward, id);
+		drive(speed, backward, controller);
 	}
 }
 
-void turnLeftRight(int speed, AccessID id) {
+void turnLeftRight(int speed, MotorAccessController controller) {
 	if (speed >= 0) {
-		drive(speed, right, id);
+		drive(speed, right, controller);
 	} else {
-		drive(speed, left, id);
+		drive(speed, left, controller);
 	}
 }
 
-void strafeLeftRight(int speed, AccessID id) {
+void strafeLeftRight(int speed, MotorAccessController controller) {
 	if (speed >= 0) {
-		strafe(speed, right, id);
+		strafe(speed, right, controller);
 	} else {
-		strafe(speed, left, id);
+		strafe(speed, left, controller);
 	}
 }

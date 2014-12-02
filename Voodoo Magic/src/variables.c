@@ -36,3 +36,10 @@ JoyInput forward_backward_drive;
 JoyInput left_right_drive;
 JoyInput forward_backward_strafe;
 JoyInput left_right_strafe;
+
+Motor liftMotors[6];
+//                 = { topLeftLift, middleLeftLift, bottomLeftLift,
+//		topRightLift, middleRightLift, bottomRightLift };
+Motor driveMotors[4];
+//= { frontLeftWheel, backLeftWheel, frontRightWheel,
+//		backRightWheel };

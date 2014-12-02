@@ -64,14 +64,13 @@ int portRead(SensorPort port) {
 		}
 		break;
 	case OUTPUT:
-		return NULL;
 		break;
 	case OUTPUT_OD:
-		return NULL;
 		break;
 	default:
-		return NULL;
+		break;
 	}
+	return (int) PORT_INCORRECT_PIN_MODE;
 }
 
 void portWrite(SensorPort port, bool value) {
@@ -320,7 +319,7 @@ Sensor sensorInitIntegratedEncoder(IMEAddr addr, MotorType type, bool inverted) 
 
 //if it is a limit switch or push button a 1 is returned if it is pressed
 int sensorGet(Sensor sensor) {
-	int value = NULL;
+	int value = 0;
 
 	switch (sensor.type) {
 	case Sensor_IntegratedEncoder:
@@ -357,8 +356,8 @@ int sensorGet(Sensor sensor) {
 	return value;
 }
 
-void sensorReset(Sensor sensor){
-	switch(sensor.type){
+void sensorReset(Sensor sensor) {
+	switch (sensor.type) {
 	case Sensor_QuadEncoder:
 		quadEncoderReset(sensor.sensorData.quadEncoder);
 		break;

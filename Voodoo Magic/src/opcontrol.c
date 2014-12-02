@@ -57,8 +57,8 @@ void operatorControl() {
 //	int value;
 	integratedEncoderResetAll();
 	sensorReset(liftEncoder);
+	joystickMainSetShiftButton(Btn6U);
 
-//	joystickMainSetShiftButton(Btn6U);
 //	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
 	pidControllerSetTarget(&liftPID, 7000);
 	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
@@ -67,14 +67,16 @@ void operatorControl() {
 //	pidControllerSetTarget(&liftPID, 0);
 //	pidStart(&liftPID);
 	while (1) {
+		lcdDisplayFormattedCenteredString(uart1, 1, "%d %d %d", motorGet(topRightLift.port), motorGet(middleRightLift.port), motorGet(bottomRightLift.port));
+		lcdDisplayFormattedCenteredString(uart1, 2, "%d %d %d", motorGet(topLeftLift.port), motorGet(middleLeftLift.port), motorGet(bottomLeftLift.port));
 //		lcdDisplayFormattedCenteredString(uart1, 1, "Lift: %d", sensorGet(liftEncoder));
 //		if(joystickRead(Btn8U) == 1){
 //			sensorReset(liftEncoder);
 
 //		}
 //		printf("Norm: %d Shift:%d\n\r", joystickRead(Ch3), joystickRead(Shift_Ch3));
-//		handleDriveOrStrafing();
-//		handleLiftInput();
+		handleDriveOrStrafing();
+		handleLiftInput();
 		delay(50);
 	}
 }

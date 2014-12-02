@@ -93,6 +93,8 @@ void initialize() {
 	middleRightLift = motorCreate(2, false);
 	bottomRightLift = motorCreate(1, true);
 
+	motorInit();
+
 	//Init Controller Buttons
 	liftUp = Btn5U;
 	liftDown = Btn5D;
