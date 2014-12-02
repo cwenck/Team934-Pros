@@ -49,6 +49,9 @@ void pidTask(void *controller) {
 		pid.last_error = pid.error;
 		pid.sensor_reading = sensorGet(pid.sensor);
 		pid.error = pid.sensor_target - pid.sensor_reading;
+
+		printf("Err: %d\n\r", pid.error);
+
 		if (abs(pid.error) < pid.integral_range) {
 			pid.integral += pid.error;
 		} else {

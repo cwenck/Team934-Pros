@@ -60,7 +60,7 @@ int motorEncoderGet(Motor motor) {
 	int value = NULL;
 	switch (motor.encoderType) {
 	case IntegratedMotorEncoder:
-		value = integratedencoderGet(motor.encoder_data.ime);
+		value = integratedEncoderGet(motor.encoder_data.ime);
 		break;
 	case QuadratureEncoder:
 		value = quadEncoderGet(motor.encoder_data.quadEncoder);
@@ -70,6 +70,32 @@ int motorEncoderGet(Motor motor) {
 		break;
 	}
 	return value;
+}
+
+QuadEncoder* motorQuadEncoderGetPointer(Motor *motor) {
+	switch (motor->encoderType) {
+	case QuadratureEncoder:
+		return &(motor->encoder_data.quadEncoder);
+		break;
+	default:
+		print("Invalid Encoder Type!\n\r");
+		return NULL;
+		break;
+	}
+	return NULL;
+}
+
+IntegratedEncoder* motorIntegratedEncoderGetPointer(Motor *motor) {
+	switch (motor->encoderType) {
+	case IntegratedMotorEncoder:
+		return &(motor->encoder_data.ime);
+		break;
+	default:
+		print("Invalid Encoder Type!\n\r");
+		return NULL;
+		break;
+	}
+	return NULL;
 }
 
 //DRIVE_THRESHOLD

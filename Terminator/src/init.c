@@ -44,6 +44,15 @@
  */
 void initializeIO() {
 	setTeamName("934");
+
+	//set pin mode for jumper autonomus
+//	pinMode(Digital_12, INPUT);
+//	pinMode(1, INPUT);
+	cortexPortsInit();
+
+	for(SensorPort i = Digital_1; i <= Analog_8; i++){
+		portSetPinMode(i, INPUT_FLOATING);
+	}
 }
 
 /*
@@ -60,26 +69,41 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
+	lcdSetup(uart1);
+	speakerInit();
+	songsInit();
+//	QuadEncoder quad = quadEncoderInit(Digital_2, Digital_3, true);
+//	liftEncoder = sensorInitFromQuadEncoder(&quad);
+
+	//Drive Integrated Encoders
+	IntegratedEncoder frontLeftWheelEncoder = integratedEncoderInit(0, false);
+//	IntegratedEncoder frontRightWheelEncoder = integratedEncoderInit(1, false);
+//	IntegratedEncoder backLeftWheelEncoder = integratedEncoderInit(2, false);
+//	IntegratedEncoder backRightWheelEncoder = integratedEncoderInit(3, false);
 
 	//Init Drive Motors
-	frontLeftWheel = createMotor(5, false);
-	frontRightWheel = createMotor(6, true);
-	backLeftWheel = createMotor(7, false);
-	backRightWheel = createMotor(8, true);
-
-	//Init Lift Motors
-	frontLeftLift = createMotor(1, false);
-	backLeftLift = createMotor(3, false);
-	frontRightLift = createMotor(2, true);
-	backRightLift = createMotor(4, false);
+	frontLeftWheel = createMotorWithIME(2, false, &frontLeftWheelEncoder);
+	frontRightWheel = createMotor(3, true);
+	backLeftWheel = createMotor(4, false);
+	backRightWheel = createMotor(5,	 true);
+//
+//	//Init Lift Motors
 
 
 	//Init Controller Buttons
-	liftUp = controlButtonInit(5, JOY_UP);
-	liftDown = controlButtonInit(5, JOY_DOWN);
+//	liftUp = controlButtonInit(5, JOY_UP);
+//	liftDown = controlButtonInit(5, JOY_DOWN);
+//
+//	forward_backward_drive = controlStickInit(3);
+//	left_right_drive = controlStickInit(4);
+//	forward_backward_strafe = controlStickInit(2);
+//	left_right_strafe = controlStickInit(1);
 
-	forward_backward_drive = controlStickInit(3);
-	left_right_drive = controlStickInit(4);
-	forward_backward_strafe = controlStickInit(2);
-	left_right_strafe = controlStickInit(1);
+	liftUp = Btn5U;
+	liftDown = Btn5D;
+
+	forward_backward_drive = Ch3;
+	left_right_drive = Ch4;
+	forward_backward_strafe = Ch2;
+	left_right_strafe = Ch1;
 }

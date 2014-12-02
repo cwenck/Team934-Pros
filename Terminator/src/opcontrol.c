@@ -51,17 +51,14 @@
  *
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
-
-
 void operatorControl() {
-
-	executeAutonIfJumperInPort(12);
-
+//	executeAutonIfJumperInPort(Digital_12);
+	int value;
 	while (1) {
-
+		lcdDisplayBatteryStatus(uart1 );
+//		FILE *auton_file = fopen("AUTON", "w");//		*auton_file
 		handleDriveOrStrafing();
 		handleLiftInput();
-
-		delay(20);
+		delay(50);
 	}
 }

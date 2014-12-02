@@ -1,45 +1,150 @@
-#include <Math.h>
 #include "main.h"
 
 ///////////
 //Sensors//
 ///////////
 
+CortexPort ports[21];
+
+void cortexPortsInit() {
+	speakerInit();
+	CortexPort *port = ports;
+	for (int i = 0; i < 21; i++) {
+		port->port = i;
+		if ((i >= 13) && (i <= 20)) {
+			port->analogCapabilites = true;
+			port->mode = INPUT_ANALOG;
+		} else {
+			port->analogCapabilites = false;
+			port->mode = INPUT;
+		}
+		port++;
+	}
+}
+
+CortexPort* cortexPortForSensorPort(SensorPort port) {
+	return &ports[port];
+}
+
+bool portIsAnalog(SensorPort port) {
+	CortexPort *cortexPort = cortexPortForSensorPort(port);
+	return cortexPort->analogCapabilites;
+}
+
+void portSetPinMode(SensorPort port, unsigned char mode) {
+	CortexPort *cortexPort = cortexPortForSensorPort(port);
+	if ((mode == INPUT_ANALOG) && cortexPort->analogCapabilites) {
+		printf("Port: %d\n\r", cortexPort->port);
+		pinMode(cortexPort->port, INPUT_ANALOG);
+		cortexPort->mode = INPUT_ANALOG;
+	} else if (mode != INPUT_ANALOG) {
+		pinMode(cortexPort->port, mode);
+		cortexPort->mode = mode;
+	}
+}
+
+int portRead(SensorPort port) {
+	CortexPort *cortexPort = cortexPortForSensorPort(port);
+	switch (cortexPort->mode) {
+	case INPUT:
+		if (cortexPort->analogCapabilites) {
+			return (analogRead(cortexPort->port - 12) < 1000) ? 0 : 1;
+		} else {
+			return digitalRead(cortexPort->port);
+		}
+		break;
+	case INPUT_ANALOG:
+		return analogRead(cortexPort->port - 12);
+		break;
+	case INPUT_FLOATING:
+		if (cortexPort->analogCapabilites) {
+			return (analogRead(cortexPort->port - 12) < 1000) ? 0 : 1;
+		} else {
+			return digitalRead(cortexPort->port);
+		}
+		break;
+	case OUTPUT:
+		return NULL;
+		break;
+	case OUTPUT_OD:
+		return NULL;
+		break;
+	default:
+		return NULL;
+	}
+}
+
+void portWrite(SensorPort port, bool value) {
+	CortexPort *cortexPort = cortexPortForSensorPort(port);
+	switch (cortexPort->mode) {
+	case OUTPUT:
+		digitalWrite(cortexPort->port, value);
+		break;
+	case OUTPUT_OD:
+		digitalWrite(cortexPort->port, value);
+		break;
+	default:
+		//Do Nothing
+		printf(
+				"Can't write to port %d because it is not configured as an output.\n\r",
+				port);
+		break;
+	}
+}
+
 // Init limit switch / bumpers in initializeIO()
-PushButton pushButtonInit(DigitalPort port) {
-	PushButton limitSwitch;
-	limitSwitch.port = port;
-	pinMode(limitSwitch.port, INPUT);
-	return limitSwitch;
+PushButton pushButtonInit(SensorPort port, bool inverted) {
+	PushButton push_button;
+	push_button.port = port;
+	push_button.inverted = inverted;
+	portSetPinMode(port, INPUT);
+	return push_button;
 }
 
 // digitalRead() returns LOW if Pressed or HIGH if released
 // the function returns true if the bumper/limit switch is pressed
-bool bumpPressed(PushButton limitSwitch) {
-	if (digitalRead(limitSwitch.port) == LOW) {
+bool pushButtonPressed(PushButton push_button) {
+	if (portRead(push_button.port) == LOW) {
+		if (!push_button.inverted) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	if (!push_button.inverted) {
+		return false;
+	} else {
 		return true;
 	}
-	return false;
 }
 
-AnalogSensor analogSensorInit(AnalogPort port, bool inverted) {
+AnalogSensor analogSensorInit(SensorPort port) {
 	AnalogSensor sensor;
 	sensor.port = port;
-	sensor.inverted = inverted;
+	portSetPinMode(port, INPUT_ANALOG);
 	return sensor;
 }
 
 int analogSensorGet(AnalogSensor sensor) {
-	if (!sensor.inverted) {
-		return analogRead(sensor.port);
-	} else {
-		return -analogRead(sensor.port);
-	}
+	return portRead(sensor.port);
 }
 
-QuadEncoder quadEncoderInit(DigitalPort topPort, DigitalPort bottomPort,
+//cannnot use the analog port or port 10 for quad encoders
+QuadEncoder quadEncoderInit(SensorPort topPort, SensorPort bottomPort,
 		bool inverted) {
 	QuadEncoder quad;
+	//cannnot use the analog port or port 10 for quad encoders
+	if (portIsAnalog(topPort) || portIsAnalog(bottomPort) || topPort == 10
+			|| bottomPort == 10) {
+		QuadEncoder *empty = NULL;
+		print(
+				"Cannnot use any analog port or digital port 10 for QuadEncoders.");
+		return *empty;
+	}
+	portSetPinMode(topPort, INPUT);
+	portSetPinMode(bottomPort, INPUT);
+	quad.top = topPort;
+	quad.bottom = bottomPort;
 	quad.encoder_data = encoderInit(topPort, bottomPort, false);
 	quad.inverted = inverted;
 	return quad;
@@ -58,15 +163,15 @@ void quadEncoderReset(QuadEncoder encoder) {
 }
 
 //360 counts per revolution
-int revolutionsToQuadEncoderCounts(float rotations){
+int revolutionsToQuadEncoderCounts(float rotations) {
 	const float countsPerRotation = 360.f;
-	return (int)(rotations * countsPerRotation);
+	return (int) (rotations * countsPerRotation);
 }
 
 //wheel diameter is in inches
 int inchesToQuadEncoderCounts(float inches, int wheelDiameter) {
 	const float countsPerRotation = 360.f;
-	float distPerRotation = wheelDiameter * M_PI ;
+	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
@@ -74,7 +179,7 @@ int inchesToQuadEncoderCounts(float inches, int wheelDiameter) {
 int feetToQuadEncoderCounts(float feet, int wheelDiameter) {
 	const int countsPerRotation = 360;
 	float inches = feet * 12.f;
-	float distPerRotation = wheelDiameter * M_PI ;
+	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
@@ -85,7 +190,7 @@ IntegratedEncoder integratedEncoderInit(IMEAddr port, bool inverted) {
 	ime.inverted = inverted;
 	return ime;
 }
-int integratedencoderGet(IntegratedEncoder encoder) {
+int integratedEncoderGet(IntegratedEncoder encoder) {
 	int value;
 	imeGet(encoder.imeAddress, &value);
 	if (encoder.inverted) {
@@ -99,15 +204,15 @@ void integratedEncoderReset(IntegratedEncoder encoder) {
 }
 
 //360 counts per revolution
-int revolutionsToIntegratedEncoderCounts(float rotations){
+int revolutionsToIntegratedEncoderCounts(float rotations) {
 	const int countsPerRotation = 360.f;
-	return (int)(rotations * countsPerRotation);
+	return (int) (rotations * countsPerRotation);
 }
 
 //wheel diameter is in inches
 int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter) {
 	const int countsPerRotation = 360;
-	float distPerRotation = wheelDiameter * M_PI ;
+	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
@@ -115,7 +220,7 @@ int inchesToIntegratedEncoderCounts(float inches, int wheelDiameter) {
 int feetToIntegratedEncoderCounts(float feet, int wheelDiameter) {
 	const int countsPerRotation = 360;
 	float inches = feet * 12.f;
-	float distPerRotation = wheelDiameter * M_PI ;
+	float distPerRotation = wheelDiameter * M_PI;
 	int counts = (inches / distPerRotation) * countsPerRotation;
 	return counts;
 }
@@ -124,55 +229,72 @@ int feetToIntegratedEncoderCounts(float feet, int wheelDiameter) {
 //if that is set as the sensor type. otherwise it does nothing.
 //Call imeInitializeAll() before calling this function
 Sensor sensorInit(SensorType type, SensorPort port_1, SensorPort port_2,
-		bool inverted, int sensorConfig) {
+		bool inverted) {
 	Sensor sensor;
+	Sensor *empty = NULL;
 	sensor.type = type;
+	if (sensor.port_1 >= Analog_1 && sensor.port_1 <= Analog_8
+			&& (type != Bumper && type != Limit_Switch)) {
+		sensor.isAnalog = true;
+	} else {
+		sensor.isAnalog = false;
+	}
 	sensor.port_1 = port_1;
 	sensor.port_2 = port_2;
 	sensor.inverted = inverted;
+	if (sensor.isAnalog) {
+		sensor.inverted = false;
+	}
 
 	switch (sensor.type) {
-	case IntegratedMotorEncoder:
-		sensor.sensorData.ime = integratedEncoderInit(sensor.port_1.imePort,
-				inverted);
-		break;
 	case QuadratureEncoder:
-		sensor.sensorData.quadEncoder = quadEncoderInit(
-				sensor.port_1.digitalPort, sensor.port_1.digitalPort, inverted);
+		sensor.sensorData.quadEncoder = quadEncoderInit(sensor.port_1,
+				sensor.port_2, inverted);
 		break;
 	case Sonar:
-		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1.digitalPort,
-				sensor.port_2.digitalPort);
+		sensor.sensorData.sonar = ultrasonicInit(sensor.port_1, sensor.port_2);
 		break;
 	case Line:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort,
-				inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
 	case Light:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort,
-				inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
 	case Bumper:
-		sensor.sensorData.pushButton = pushButtonInit(
-				sensor.port_1.digitalPort);
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1, inverted);
 		break;
 	case Limit_Switch:
-		sensor.sensorData.pushButton = pushButtonInit(
-				sensor.port_1.digitalPort);
+		sensor.sensorData.pushButton = pushButtonInit(sensor.port_1, inverted);
 		break;
 	case Potentiometer:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort,
-				inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
 	case Gyroscope:
-		sensor.sensorData.gyro = gyroInit(sensor.port_1.analogPort,
-				sensorConfig);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
 	case Accelerometer:
-		sensor.sensorData.analog = analogSensorInit(sensor.port_1.analogPort,
-				inverted);
+		sensor.sensorData.analog = analogSensorInit(sensor.port_1);
 		break;
+	default:
+		print("Invalid Sensor Type\n\r");
+		return *empty;
 	}
+	return sensor;
+}
+
+Sensor sensorInitFromIntegratedEncoder(IntegratedEncoder *encoder) {
+	Sensor sensor;
+	sensor.type = IntegratedMotorEncoder;
+	sensor.sensorData.ime = *encoder;
+	sensor.inverted = false;
+	return sensor;
+}
+
+Sensor sensorInitFromQuadEncoder(QuadEncoder *encoder) {
+	Sensor sensor;
+	sensor.type = QuadratureEncoder;
+	sensor.sensorData.quadEncoder = *encoder;
+	sensor.inverted = false;
 	return sensor;
 }
 
@@ -182,7 +304,7 @@ int sensorGet(Sensor sensor) {
 
 	switch (sensor.type) {
 	case IntegratedMotorEncoder:
-		value = integratedencoderGet(sensor.sensorData.ime);
+		value = integratedEncoderGet(sensor.sensorData.ime);
 		break;
 	case QuadratureEncoder:
 		value = quadEncoderGet(sensor.sensorData.quadEncoder);
@@ -197,16 +319,16 @@ int sensorGet(Sensor sensor) {
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Bumper:
-		value = bumpPressed(sensor.sensorData.pushButton);
+		value = pushButtonPressed(sensor.sensorData.pushButton);
 		break;
 	case Limit_Switch:
-		value = bumpPressed(sensor.sensorData.pushButton);
+		value = pushButtonPressed(sensor.sensorData.pushButton);
 		break;
 	case Potentiometer:
 		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Gyroscope:
-		value = gyroGet(sensor.sensorData.gyro);
+		value = analogSensorGet(sensor.sensorData.analog);
 		break;
 	case Accelerometer:
 		value = analogSensorGet(sensor.sensorData.analog);

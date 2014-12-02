@@ -2,19 +2,17 @@
 #define VARIABLES_H_
 
 //Sensors
-extern QuadEncoder liftEncoder;
+extern Sensor liftEncoder;
 
+extern PIDController liftPID;
+extern PIDController strafePID;
+extern PIDController drivePID;
 
 //Motors
 extern Motor frontLeftWheel;
 extern Motor frontRightWheel;
 extern Motor backLeftWheel;
 extern Motor backRightWheel;
-
-extern Motor frontLeftLift;
-extern Motor backLeftLift;
-extern Motor frontRightLift;
-extern Motor backRightLift;
 
 //Joystick
 extern JoyInput liftUp;

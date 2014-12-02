@@ -22,9 +22,19 @@ void printMainBatteyPower() {
 	printf("Main Battery: %.2fV", getMainBatteryPower());
 }
 
-void executeAutonIfJumperInPort(DigitalPort port){
+void executeAutonIfJumperInPort(SensorPort port){
 	pinMode(port, INPUT);
 	if(!digitalRead(port)){
 		autonomous();
 	}
+}
+
+bool fileExists(char *file){
+	FILE *temp;
+	temp = fopen(file, "r");
+	if(temp){
+		fclose(temp);
+		return true;
+	}
+	return false;
 }

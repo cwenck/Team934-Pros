@@ -21,6 +21,8 @@ float getMainBatteryPower();
 //print the main batter power in volts
 void printMainBatteryPower();
 
-void executeAutonIfJumperInPort(DigitalPort port);
+void executeAutonIfJumperInPort(SensorPort port);
+
+bool fileExists(char *file);
 
 #endif /* UTIL_H_ */

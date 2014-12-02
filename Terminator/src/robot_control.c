@@ -17,10 +17,12 @@ const short liftHighPower = 127;
 const short liftLowPower = 80;
 
 void setLiftPower(int speed) {
-	setMotorPower(frontLeftLift, speed);
-	setMotorPower(frontRightLift, speed);
-	setMotorPower(backLeftLift, speed);
-	setMotorPower(backRightLift, speed);
+//	setMotorPower(topLeftLift, speed);
+//	setMotorPower(middleLeftLift, speed);
+//	setMotorPower(bottomLeftLift, speed);
+//	setMotorPower(topRightLift, speed);
+//	setMotorPower(middleRightLift, speed);
+//	setMotorPower(bottomRightLift, speed);
 }
 
 void handleLiftInput() {
