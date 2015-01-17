@@ -58,11 +58,11 @@ void operatorControl() {
 	sensorReset(liftEncoder);
 
 
-	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
+//	lcdDisplayFormattedCenteredString(uart1, 1, "IMEs: %d", connectedIntegratedMotorEncoders);
 //	pidControllerSetTarget(&liftPID, 7000);
-	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(25.f));
+//	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(36.f));
 //	pidStart(&liftPID);
-	delay(5000);
+//	delay(5000);
 //	pidControllerSetTarget(&liftPID, 0);
 //	pidStart(&liftPID);
 	while (1) {

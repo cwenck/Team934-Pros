@@ -62,16 +62,16 @@ void initializeIO() {
 void initialize() {
 
 	//Init Drive Motors
-	frontLeftWheel = createMotor(5, false);
-	frontRightWheel = createMotor(6, true);
-	backLeftWheel = createMotor(7, false);
-	backRightWheel = createMotor(8, true);
+	frontLeftWheel = createMotor(3, false);
+	frontRightWheel = createMotor(2, true);
+	backLeftWheel = createMotor(5, false);
+	backRightWheel = createMotor(4, true);
 
 	//Init Lift Motors
-	frontLeftLift = createMotor(1, false);
-	backLeftLift = createMotor(3, false);
-	frontRightLift = createMotor(2, true);
-	backRightLift = createMotor(4, false);
+	frontLeftLift = createMotor(6, false);
+	backLeftLift = createMotor(7, true);
+	frontRightLift = createMotor(9, false);
+	backRightLift = createMotor(8, false);
 
 
 	//Init Controller Buttons
