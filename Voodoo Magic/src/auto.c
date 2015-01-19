@@ -51,6 +51,6 @@
 
 #include <Math.h>
 void autonomous() {
-//	redCubeOnPost();
-	strafeLeft();
+	blueCubeOnPost();
+//	strafeLeft();
 }

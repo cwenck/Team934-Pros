@@ -28,28 +28,35 @@ void driveBack() {
 }
 
 void blueCubeOnPost() {
-//	pidControllerSetTarget(&liftPID, 7600);
-//	pidStart(&liftPID);
-	setLiftPower(127);
-	delay(3200);
-	setLiftPower(0);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(24.5));
+	pidStartAsFuntion(&liftPID);
 	strafe(127, left);
-	delay(1800);
+	delay(800);
 	strafe(0, left);
+	drive(127, forward);
+	delay(500);
+	drive(0, forward);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(19.75));
+	pidStartAsFuntion(&liftPID);
+	drive(127, backward);
+	delay(500);
+	drive(0, backward);
+
 }
 
 void redCubeOnPost() {
-	setLiftPower(127);
-	delay(3200);
-	setLiftPower(0);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(24.5));
+	pidStartAsFuntion(&liftPID);
 	strafe(127, right);
-	delay(550);
+	delay(800);
 	strafe(0, right);
 	drive(127, forward);
-	delay(100);
+	delay(500);
 	drive(0, forward);
-	setLiftPower(-127);
-	delay(400);
-	setLiftPower(0);
+	pidControllerSetTarget(&liftPID, inchesToLiftEncoderTicks(19.75));
+	pidStartAsFuntion(&liftPID);
+	drive(127, backward);
+	delay(500);
+	drive(0, backward);
 }
 

@@ -52,6 +52,7 @@ void pidSetIntegralRange(PIDController *controller, float integralRange);
 void pidControllerSetIntegralSpeedBounds(PIDController *controller,
 		float integral_min, float integral_max);
 void pidStart(PIDController *controller);
+void pidStartAsFuntion(PIDController *pid);
 void pidTask(void *ignore);
 
 #endif /* PID_H_ */

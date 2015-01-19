@@ -17,6 +17,7 @@ const short liftHighPower = 127;
 const short liftLowPower = 80;
 
 void setLiftPower(int speed) {
+//	speed = -    speed;
 	motorPowerSet(topLeftLift, speed);
 	motorPowerSet(middleLeftLift, speed);
 	motorPowerSet(bottomLeftLift, speed);

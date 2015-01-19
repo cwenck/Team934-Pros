@@ -52,7 +52,7 @@
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-//	executeAutonIfJumperInPort(Digital_12);
+	executeAutonIfJumperInPort(Digital_12);
 //	int value;
 	integratedEncoderResetAll();
 	sensorReset(liftEncoder);
